@@ -336,8 +336,7 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
   }
 
   formatLocalISO(date: Date): string {
-    const pad = (num: number) => String(num).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    return date.toISOString().slice(0, 19);
   }
 
   setReminderToday(): void {
@@ -367,7 +366,8 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
 
   setCustomReminder(): void {
     if (this.customReminderTime) {
-      this.reminder = this.customReminderTime + ':00';
+      const localDate = new Date(this.customReminderTime);
+      this.reminder = this.formatLocalISO(localDate);
     }
   }
 
@@ -379,7 +379,10 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
 
   formatReminder(isoString: string | null): string {
     if (!isoString) return '';
-    const date = new Date(isoString);
+    const normalizedString = (isoString.includes('Z') || isoString.includes('+') || isoString.includes('-')) 
+                             ? isoString 
+                             : isoString + 'Z';
+    const date = new Date(normalizedString);
     return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 }

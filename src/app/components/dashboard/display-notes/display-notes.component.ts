@@ -734,8 +734,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   }
 
   formatLocalISO(date: Date): string {
-    const pad = (num: number) => String(num).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    return date.toISOString().slice(0, 19);
   }
 
   initializeReminderTimeMaps(): void {
@@ -874,7 +873,10 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
   formatReminder(isoString: string | null): string {
     if (!isoString) return '';
-    const date = new Date(isoString);
+    const normalizedString = (isoString.includes('Z') || isoString.includes('+') || isoString.includes('-')) 
+                             ? isoString 
+                             : isoString + 'Z';
+    const date = new Date(normalizedString);
     return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
@@ -909,7 +911,8 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
   setCustomReminderEdit(): void {
     if (this.editCustomReminderTime) {
-      this.editReminder = this.editCustomReminderTime + ':00';
+      const localDate = new Date(this.editCustomReminderTime);
+      this.editReminder = this.formatLocalISO(localDate);
       this.editReminderMenuOpen = false;
     }
   }
