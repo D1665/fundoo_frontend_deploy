@@ -216,7 +216,7 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
         if (!token) {
           alert('Authentication Token missing! Please Sign Out and Sign In again.');
         } else {
-          alert(`HTTP Error ${err.status || 0}: ${err.error?.message || err.message || 'Cannot connect to backend'}. Ensure backend is running at http://localhost:8086.`);
+          alert(`HTTP Error ${err.status || 0}: ${err.error?.message || err.message || 'Cannot connect to backend'}. Please verify backend service status.`);
         }
         this.noteService.fetchNotesFromBackend();
       }
