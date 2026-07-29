@@ -97,15 +97,18 @@ export class SignInComponent {
       },
   
       error: (error) => {
-  
         console.error(error);
-  
-        if (error.error && error.error.message) {
-          this.errorMessage = error.error.message;
+        if (error.status === 0) {
+          this.errorMessage = 'Cannot connect to backend. Please check CORS configuration on Render.';
+          this.snackbar.error(this.errorMessage);
         } else {
-          this.errorMessage = 'Invalid Email or Password';
+          if (error.error && error.error.message) {
+            this.errorMessage = error.error.message;
+          } else {
+            this.errorMessage = 'Invalid Email or Password';
+          }
+          this.snackbar.error(this.errorMessage);
         }
-        this.snackbar.error('Invalid Email or Password');
       }
   
     });

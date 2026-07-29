@@ -164,10 +164,15 @@ export class SignUpComponent {
       error: (err: any) => {
         console.error(err);
         let errorMsg = 'Registration failed.';
-        if (err.error) {
-          // If the backend returns validation errors as a map
+        if (err.status === 0) {
+          errorMsg = 'Cannot connect to backend. Please verify the backend is running and CORS is configured on Render.';
+        } else if (err.error) {
           if (typeof err.error === 'object') {
-            errorMsg = Object.values(err.error).join(' ');
+            if (err.error.message) {
+              errorMsg = err.error.message;
+            } else {
+              errorMsg = Object.values(err.error).join(' ');
+            }
           } else {
             try {
               const parsed = JSON.parse(err.error);
