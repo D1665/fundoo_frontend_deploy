@@ -1,0 +1,25 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Angular
+.angular/
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.cproject
+.settings/
+.vscode/
+*.swp
+*.placeholder
+
+# System files
+.DS_Store
+Thumbs.db

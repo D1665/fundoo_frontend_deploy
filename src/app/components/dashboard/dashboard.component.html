@@ -1,0 +1,16 @@
+<app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
+
+<div class="dashboard-container">
+
+    <div class="sidebar-wrapper" [class.collapsed]="isSidebarCollapsed">
+        <app-sidebar [isCollapsed]="isSidebarCollapsed"></app-sidebar>
+    </div>
+
+    <div class="content">
+
+        <app-create-note *ngIf="currentView === 'notes' || currentView.startsWith('label_')"></app-create-note>
+        <app-display-notes></app-display-notes>
+
+    </div>
+
+</div>

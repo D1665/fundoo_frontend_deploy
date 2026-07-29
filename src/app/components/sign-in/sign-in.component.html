@@ -1,0 +1,52 @@
+<div class="page-wrapper">
+  <div class="signin-card">
+    <h1 class="logo">
+      <span class="f">F</span><span class="u">u</span><span class="n">n</span><span class="d1">d</span><span class="o1">o</span><span class="o2">o</span>
+    </h1>
+
+    <h2 class="title">Sign in</h2>
+    <p class="subtitle">Use your Fundoo Account</p>
+
+    <form (ngSubmit)="onSignIn()" #signInForm="ngForm">
+      <div class="input-group">
+        <input
+          type="email"
+          name="email"
+          placeholder="Email*"
+          [(ngModel)]="email"
+          required
+          class="text-input"
+          (input)="validateEmail()"
+          [class.error-input]="emailError"
+        />
+        <p class="field-error" *ngIf="emailError">{{ emailError }}</p>
+      </div>
+
+      <div class="input-group">
+        <input
+          type="password"
+          name="password"
+          placeholder="Password*"
+          [(ngModel)]="password"
+          required
+          class="text-input"
+          [class.error-input]="passwordError"
+          (input)="validatePassword()"
+        />
+        <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
+      </div>
+
+      <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="actions-row">
+        <a class="link" (click)="goToForgotPassword()">Forgot password?</a>
+      </div>
+
+      <div class="bottom-row">
+        <a class="link create-account" (click)="goToSignUp()">Create account</a>
+        <button type="submit" class="btn-primary">Sign in</button>
+      </div>
+    </form>
+  </div>
+</div>

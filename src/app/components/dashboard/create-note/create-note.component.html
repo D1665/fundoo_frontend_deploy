@@ -1,0 +1,226 @@
+<div class="note-container">
+
+    <!-- Hidden File Input for Image Uploading -->
+    <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+
+    <!-- Expanded -->
+    <div class="note-box" *ngIf="isExpanded" [style.background-color]="selectedColor">
+
+        <!-- Image Preview -->
+        <div class="card-image-wrapper" *ngIf="image">
+            <img [src]="image" class="card-image" alt="Selected Image Preview" />
+            <button mat-icon-button class="remove-img-btn" (click)="removeImage($event)" title="Remove image">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="title-wrapper">
+            <input
+                type="text"
+                placeholder="Title"
+                class="title-input"
+                [(ngModel)]="title">
+
+            <button mat-icon-button (click)="togglePin($event)" class="pin-btn" [class.pinned]="isPinned" title="Pin note">
+                <mat-icon>{{ isPinned ? 'push_pin' : 'push_pin_outlined' }}</mat-icon>
+            </button>
+        </div>
+
+        <textarea
+            #descTextarea
+            placeholder="Take a note..."
+            class="description"
+            [(ngModel)]="description"
+            (input)="autoGrow($event)">
+        </textarea>
+
+        <!-- Metadata Chips & Collaborators row -->
+        <div class="card-footer-chips" *ngIf="reminder || selectedLabels.length > 0 || collaboratorsList.length > 0">
+            <span class="reminder-chip" *ngIf="reminder" (click)="$event.stopPropagation()">
+                <mat-icon class="reminder-chip-icon">access_time</mat-icon>
+                <span class="reminder-chip-text">{{ formatReminder(reminder) }}</span>
+                <mat-icon class="chip-remove" (click)="removeReminder($event)">close</mat-icon>
+            </span>
+            <span class="label-chip" *ngFor="let label of selectedLabels" (click)="$event.stopPropagation()">
+                {{ label.name }}
+                <mat-icon class="chip-remove" (click)="toggleLabel(label)">close</mat-icon>
+            </span>
+            <div class="collab-avatar-circle" *ngFor="let collab of collaboratorsList" [title]="collab">
+                {{ collab[0] | uppercase }}
+            </div>
+        </div>
+
+        <div class="bottom">
+
+            <div class="icons">
+
+                <div class="reminder-menu-container">
+                    <button mat-icon-button type="button" title="Remind me" (click)="toggleReminderMenu($event)">
+                        <mat-icon>add_alert</mat-icon>
+                    </button>
+
+                    <div class="reminder-dropdown" *ngIf="createReminderMenuOpen" (click)="$event.stopPropagation()">
+                        <div class="reminder-options">
+                            <div class="reminder-title">Remind me:</div>
+                            <button class="reminder-option-btn" (click)="setReminderToday(); createReminderMenuOpen = false;">
+                                <mat-icon>access_time</mat-icon>
+                                <span>Later today (8:00 PM)</span>
+                            </button>
+                            <button class="reminder-option-btn" (click)="setReminderTomorrow(); createReminderMenuOpen = false;">
+                                <mat-icon>access_time</mat-icon>
+                                <span>Tomorrow (8:00 AM)</span>
+                            </button>
+                            <button class="reminder-option-btn" (click)="setReminderNextWeek(); createReminderMenuOpen = false;">
+                                <mat-icon>access_time</mat-icon>
+                                <span>Next week (Mon 8:00 AM)</span>
+                            </button>
+                            <div class="custom-datetime-picker-row">
+                                <mat-icon>date_range</mat-icon>
+                                <input type="datetime-local" [(ngModel)]="customReminderTime" />
+                                <button class="picker-save-btn" (click)="setCustomReminder(); createReminderMenuOpen = false;">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button mat-icon-button type="button" title="Collaborator" (click)="openCollaboratorModal($event)">
+                    <mat-icon>person_add_alt</mat-icon>
+                </button>
+
+                <button mat-icon-button [matMenuTriggerFor]="colorMenu" type="button" title="Background options">
+                    <mat-icon>palette</mat-icon>
+                </button>
+
+                <mat-menu #colorMenu="matMenu" class="color-menu-panel">
+                    <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                        <button *ngFor="let c of colors" 
+                                class="color-dot" 
+                                [style.background-color]="c.color" 
+                                [title]="c.name"
+                                [class.active-color]="selectedColor === c.color"
+                                (click)="selectColor(c.color)">
+                            <mat-icon *ngIf="selectedColor === c.color" class="check-icon">check</mat-icon>
+                        </button>
+                    </div>
+                </mat-menu>
+
+                <button mat-icon-button type="button" title="Add image" (click)="fileInput.click()">
+                    <mat-icon>image</mat-icon>
+                </button>
+
+                <button mat-icon-button type="button" (click)="toggleArchive($event)" [class.active-icon]="isArchived" title="Archive">
+                    <mat-icon>{{ isArchived ? 'archive' : 'archive' }}</mat-icon>
+                </button>
+
+                <button mat-icon-button type="button" title="More" [matMenuTriggerFor]="moreMenu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #moreMenu="matMenu" class="label-menu-panel">
+                    <button mat-menu-item [matMenuTriggerFor]="creatorLabelMenu">
+                        <span>Add label</span>
+                    </button>
+                    <button mat-menu-item (click)="discardNote()">
+                        <span>Delete note</span>
+                    </button>
+                </mat-menu>
+
+                <mat-menu #creatorLabelMenu="matMenu" class="label-menu-panel">
+                    <div class="label-menu-header" (click)="$event.stopPropagation()">Label note</div>
+                    <div class="label-menu-item" *ngFor="let label of allLabels" (click)="toggleLabel(label); $event.stopPropagation()">
+                        <mat-icon class="check-box-icon">{{ isLabelSelected(label) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+                        <span>{{ label.name }}</span>
+                    </div>
+                </mat-menu>
+
+            </div>
+
+            <button
+                class="close-btn"
+                (click)="closeNote()">
+                Close
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Collapsed -->
+    <div
+        class="collapsed"
+        *ngIf="!isExpanded"
+        (click)="openNote()">
+
+        <input
+            placeholder="Take a note..."
+            readonly>
+
+        <div class="collapsed-icons">
+
+            <button mat-icon-button type="button">
+                <mat-icon>check_box</mat-icon>
+            </button>
+        
+            <button mat-icon-button type="button">
+                <mat-icon>brush</mat-icon>
+            </button>
+        
+            <button mat-icon-button type="button" (click)="$event.stopPropagation(); fileInput.click()">
+                <mat-icon>image</mat-icon>
+            </button>
+        
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Collaborator Modal Dialog (Google Keep Style) -->
+<div class="modal-backdrop" *ngIf="isCollaboratorModalOpen" (click)="closeCollaboratorModal()">
+    <div class="modal-card collaborator-modal" (click)="$event.stopPropagation()">
+        <h3 class="collab-header">Collaborators</h3>
+        <div class="collab-divider"></div>
+
+        <!-- Owner Row -->
+        <div class="collab-row">
+            <div class="collab-avatar owner-avatar">
+                {{ ownerEmail[0] | uppercase }}
+            </div>
+            <div class="collab-info">
+                <span class="collab-email font-bold">{{ ownerEmail }}</span>
+                <span class="collab-role"> (Owner)</span>
+            </div>
+        </div>
+
+        <!-- Existing Collaborators List -->
+        <div class="collab-row" *ngFor="let collab of collaboratorsList">
+            <div class="collab-avatar">
+                {{ collab[0] | uppercase }}
+            </div>
+            <div class="collab-info">
+                <span class="collab-email">{{ collab }}</span>
+            </div>
+            <button mat-icon-button class="remove-collab-btn" (click)="removeCollaborator(collab)" title="Remove collaborator">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <!-- Add New Collaborator Input Row -->
+        <div class="collab-row input-row">
+            <div class="collab-avatar add-avatar">
+                <mat-icon>person_add</mat-icon>
+            </div>
+            <div class="collab-input-wrapper">
+                <input type="email" class="collab-input" placeholder="Person or email to share with" [(ngModel)]="newCollaboratorEmail" (keyup.enter)="addCollaborator()" />
+            </div>
+            <button mat-icon-button class="add-collab-btn" (click)="addCollaborator()" title="Add collaborator">
+                <mat-icon>check</mat-icon>
+            </button>
+        </div>
+
+        <div class="collab-footer">
+            <button class="collab-btn cancel-btn" (click)="closeCollaboratorModal()">Cancel</button>
+            <button class="collab-btn save-btn" (click)="saveCollaborators()">Save</button>
+        </div>
+    </div>
+</div>

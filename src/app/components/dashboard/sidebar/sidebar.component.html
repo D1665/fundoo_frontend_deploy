@@ -1,0 +1,39 @@
+<div class="sidebar-container" [class.collapsed]="!isExpanded" [class.hover-expanded]="isCollapsed && isHovered">
+    <mat-nav-list>
+        <!-- Notes (Home) -->
+        <a mat-list-item [class.active]="activeView === 'notes'" (click)="selectView('notes')">
+            <mat-icon matListItemIcon>lightbulb_outline</mat-icon>
+            <span matListItemTitle>Notes</span>
+        </a>
+
+        <!-- Reminders -->
+        <a mat-list-item [class.active]="activeView === 'reminders'" (click)="selectView('reminders')">
+            <mat-icon matListItemIcon>notifications_none</mat-icon>
+            <span matListItemTitle>Reminders</span>
+        </a>
+
+        <!-- Dynamic User Labels -->
+        <a mat-list-item *ngFor="let label of labels" [class.active]="activeView === 'label_' + label.id" (click)="selectLabel(label)">
+            <mat-icon matListItemIcon>label_outline</mat-icon>
+            <span matListItemTitle>{{ label.name }}</span>
+        </a>
+
+        <!-- Edit Labels Item -->
+        <a mat-list-item (click)="selectView('edit-labels')">
+            <mat-icon matListItemIcon>edit</mat-icon>
+            <span matListItemTitle>Edit labels</span>
+        </a>
+
+        <!-- Archive -->
+        <a mat-list-item [class.active]="activeView === 'archive'" (click)="selectView('archive')">
+            <mat-icon matListItemIcon>archive</mat-icon>
+            <span matListItemTitle>Archive</span>
+        </a>
+
+        <!-- Trash -->
+        <a mat-list-item [class.active]="activeView === 'trash'" (click)="selectView('trash')">
+            <mat-icon matListItemIcon>delete_outline</mat-icon>
+            <span matListItemTitle>Bin</span>
+        </a>
+    </mat-nav-list>
+</div>

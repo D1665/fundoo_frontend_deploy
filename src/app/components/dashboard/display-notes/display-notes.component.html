@@ -1,0 +1,467 @@
+<div class="display-notes-container">
+
+    <!-- Hidden File Input for Image Uploading -->
+    <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+
+    <!-- Loading State -->
+    <div class="loading-container" *ngIf="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading notes...</div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && pinnedNotes.length === 0 && otherNotes.length === 0">
+        <mat-icon class="empty-icon" *ngIf="currentView === 'notes'">lightbulb_outline</mat-icon>
+        <mat-icon class="empty-icon" *ngIf="currentView === 'archive'">archive</mat-icon>
+        <mat-icon class="empty-icon" *ngIf="currentView === 'trash'">delete_outline</mat-icon>
+        <mat-icon class="empty-icon" *ngIf="currentView === 'reminders'">notifications_none</mat-icon>
+
+        <p class="empty-text" *ngIf="currentView === 'notes'">Notes you add appear here</p>
+        <p class="empty-text" *ngIf="currentView === 'archive'">Your archived notes appear here</p>
+        <p class="empty-text" *ngIf="currentView === 'trash'">No notes in Trash</p>
+        <p class="empty-text" *ngIf="currentView === 'reminders'">Notes with upcoming reminders appear here</p>
+    </div>
+
+    <!-- Pinned Notes Section (Notes View only) -->
+    <div class="notes-section" *ngIf="!loading && currentView === 'notes' && pinnedNotes.length > 0">
+        <h3 class="section-title">PINNED</h3>
+        <div class="notes-grid" [class.list-view]="!isGridView">
+            <div *ngFor="let note of pinnedNotes" 
+                 class="note-card" 
+                 [class.active-menu-card]="activeReminderNoteId === note.id"
+                 [style.background-color]="note.color || '#ffffff'"
+                 (click)="openEditModal(note)">
+
+                <!-- Card Image Preview -->
+                <div class="card-image-wrapper" *ngIf="getNoteImage(note)">
+                    <img [src]="getNoteImage(note)" class="card-image" alt="Note Image" />
+                    <button mat-icon-button class="remove-img-btn" (click)="removeNoteImage(note, $event)" title="Remove image">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-header">
+                    <div class="title-with-badge">
+                        <h4 class="card-title">{{ note.title }}</h4>
+                        <span *ngIf="isSharedNote(note)" class="shared-badge" [title]="'Shared by ' + (note.ownerEmail || 'another user')">Shared</span>
+                    </div>
+                    <button mat-icon-button class="pin-btn pinned" (click)="togglePin(note, $event)" title="Unpin note">
+                        <mat-icon>push_pin</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-content">
+                    {{ note.content || note.description }}
+                </div>
+
+                <!-- Label, Reminder & Collaborator Chips (All in one row) -->
+                <div class="card-footer-chips" *ngIf="(getNoteLabels(note).length > 0) || note.reminder || getNoteCollaborators(note).length > 0" (click)="$event.stopPropagation()">
+                    <span class="reminder-chip" *ngIf="note.reminder">
+                        <mat-icon class="reminder-chip-icon">access_time</mat-icon>
+                        <span class="reminder-chip-text">{{ formatReminder(note.reminder) }}</span>
+                        <mat-icon class="chip-remove" (click)="removeReminderFromNote(note, $event)">close</mat-icon>
+                    </span>
+                    <span class="label-chip" *ngFor="let label of getNoteLabels(note)">
+                        {{ label.name }}
+                        <mat-icon class="chip-remove" (click)="removeLabelFromNoteCard(note, label, $event)">close</mat-icon>
+                    </span>
+                    <div class="collab-avatar-circle" *ngFor="let collab of getNoteCollaborators(note)" [title]="collab">
+                        {{ collab[0] | uppercase }}
+                    </div>
+                </div>
+
+                <div class="card-actions" (click)="$event.stopPropagation()">
+                    <div class="reminder-menu-container">
+                        <button mat-icon-button title="Remind me" (click)="toggleReminderMenu(note, $event)" type="button">
+                            <mat-icon>add_alert</mat-icon>
+                        </button>
+
+                        <div class="reminder-dropdown" *ngIf="activeReminderNoteId === note.id" (click)="$event.stopPropagation()">
+                            <div class="reminder-options">
+                                <div class="reminder-title">Remind me:</div>
+                                <button class="reminder-option-btn" (click)="setReminderToday(note, $event)">
+                                    <mat-icon>access_time</mat-icon>
+                                    <span>Later today (8:00 PM)</span>
+                                </button>
+                                <button class="reminder-option-btn" (click)="setReminderTomorrow(note, $event)">
+                                    <mat-icon>access_time</mat-icon>
+                                    <span>Tomorrow (8:00 AM)</span>
+                                </button>
+                                <button class="reminder-option-btn" (click)="setReminderNextWeek(note, $event)">
+                                    <mat-icon>access_time</mat-icon>
+                                    <span>Next week (Mon 8:00 AM)</span>
+                                </button>
+                                <div class="custom-datetime-picker-row">
+                                    <mat-icon>date_range</mat-icon>
+                                    <input type="datetime-local" [(ngModel)]="customReminderTimeMap[note.id!]" />
+                                    <button class="picker-save-btn" (click)="setCustomReminder(note, $event)">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button mat-icon-button title="Collaborator" (click)="openCollaboratorModal(note, $event)" type="button">
+                        <mat-icon>person_add_alt</mat-icon>
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="pinnedColorMenu" title="Background options" type="button">
+                        <mat-icon>palette</mat-icon>
+                    </button>
+
+                    <mat-menu #pinnedColorMenu="matMenu" class="color-menu-panel">
+                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                            <button *ngFor="let c of colors" 
+                                    class="color-dot" 
+                                    [style.background-color]="c.color" 
+                                    [title]="c.name"
+                                    [class.active-color]="(note.color || '#ffffff') === c.color"
+                                    (click)="changeColor(note, c.color, $event)">
+                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
+                            </button>
+                        </div>
+                    </mat-menu>
+
+                    <button mat-icon-button title="Add image" (click)="openImageUploader(note, fileInput, $event)" type="button">
+                        <mat-icon>image</mat-icon>
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="pinnedLabelMenu" title="Add label" type="button">
+                        <mat-icon>label_outline</mat-icon>
+                    </button>
+
+                    <mat-menu #pinnedLabelMenu="matMenu" class="label-menu-panel">
+                        <div class="label-menu-header" (click)="$event.stopPropagation()">Label note</div>
+                        <div class="label-menu-item" *ngFor="let label of allLabels" (click)="toggleLabelOnNote(note, label, $event)">
+                            <mat-icon class="check-box-icon">{{ isLabelOnNote(note, label) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+                            <span>{{ label.name }}</span>
+                        </div>
+                    </mat-menu>
+
+                    <button mat-icon-button title="Archive" (click)="toggleArchive(note, $event)" type="button">
+                        <mat-icon>archive</mat-icon>
+                    </button>
+
+                    <button *ngIf="!isSharedNote(note)" mat-icon-button title="Delete note" (click)="trashNote(note, $event)" type="button">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Notes Grid (Notes, Archive, Trash Views) -->
+    <div class="notes-section" *ngIf="!loading && otherNotes.length > 0">
+        <h3 class="section-title" *ngIf="currentView === 'notes' && pinnedNotes.length > 0">OTHERS</h3>
+        <h3 class="section-title" *ngIf="currentView === 'archive'">ARCHIVE</h3>
+        <h3 class="section-title" *ngIf="currentView === 'trash'">TRASH</h3>
+
+        <div class="notes-grid" [class.list-view]="!isGridView">
+            <div *ngFor="let note of otherNotes" 
+                 class="note-card" 
+                 [class.trash-card]="currentView === 'trash'"
+                 [class.active-menu-card]="activeReminderNoteId === note.id"
+                 [style.background-color]="note.color || '#ffffff'"
+                 (click)="openEditModal(note)">
+
+                <!-- Card Image Preview -->
+                <div class="card-image-wrapper" *ngIf="getNoteImage(note)">
+                    <img [src]="getNoteImage(note)" class="card-image" alt="Note Image" />
+                    <button mat-icon-button class="remove-img-btn" (click)="removeNoteImage(note, $event)" title="Remove image">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-header">
+                    <div class="title-with-badge">
+                        <h4 class="card-title">{{ note.title }}</h4>
+                        <span *ngIf="isSharedNote(note)" class="shared-badge" [title]="'Shared by ' + (note.ownerEmail || 'another user')">Shared</span>
+                    </div>
+                    <button *ngIf="currentView === 'notes'" mat-icon-button class="pin-btn" (click)="togglePin(note, $event)" title="Pin note">
+                        <mat-icon>push_pin_outlined</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-content">
+                    {{ note.content || note.description }}
+                </div>
+
+                <!-- Label, Reminder & Collaborator Chips (All in one row) -->
+                <div class="card-footer-chips" *ngIf="(getNoteLabels(note).length > 0) || note.reminder || getNoteCollaborators(note).length > 0" (click)="$event.stopPropagation()">
+                    <span class="reminder-chip" *ngIf="note.reminder">
+                        <mat-icon class="reminder-chip-icon">access_time</mat-icon>
+                        <span class="reminder-chip-text">{{ formatReminder(note.reminder) }}</span>
+                        <mat-icon class="chip-remove" (click)="removeReminderFromNote(note, $event)">close</mat-icon>
+                    </span>
+                    <span class="label-chip" *ngFor="let label of getNoteLabels(note)">
+                        {{ label.name }}
+                        <mat-icon class="chip-remove" (click)="removeLabelFromNoteCard(note, label, $event)">close</mat-icon>
+                    </span>
+                    <div class="collab-avatar-circle" *ngFor="let collab of getNoteCollaborators(note)" [title]="collab">
+                        {{ collab[0] | uppercase }}
+                    </div>
+                </div>
+
+                <!-- Actions for Notes & Archive View -->
+                <div class="card-actions" *ngIf="currentView !== 'trash'" (click)="$event.stopPropagation()">
+                    <div class="reminder-menu-container">
+                        <button mat-icon-button title="Remind me" (click)="toggleReminderMenu(note, $event)" type="button">
+                            <mat-icon>add_alert</mat-icon>
+                        </button>
+
+                        <div class="reminder-dropdown" *ngIf="activeReminderNoteId === note.id" (click)="$event.stopPropagation()">
+                            <div class="reminder-options">
+                                <div class="reminder-title">Remind me:</div>
+                                <button class="reminder-option-btn" (click)="setReminderToday(note, $event)">
+                                    <mat-icon>access_time</mat-icon>
+                                    <span>Later today (8:00 PM)</span>
+                                </button>
+                                <button class="reminder-option-btn" (click)="setReminderTomorrow(note, $event)">
+                                    <mat-icon>access_time</mat-icon>
+                                    <span>Tomorrow (8:00 AM)</span>
+                                </button>
+                                <button class="reminder-option-btn" (click)="setReminderNextWeek(note, $event)">
+                                    <mat-icon>access_time</mat-icon>
+                                    <span>Next week (Mon 8:00 AM)</span>
+                                </button>
+                                <div class="custom-datetime-picker-row">
+                                    <mat-icon>date_range</mat-icon>
+                                    <input type="datetime-local" [(ngModel)]="customReminderTimeMap[note.id!]" />
+                                    <button class="picker-save-btn" (click)="setCustomReminder(note, $event)">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button mat-icon-button title="Collaborator" (click)="openCollaboratorModal(note, $event)" type="button">
+                        <mat-icon>person_add_alt</mat-icon>
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="otherCardColorMenu" title="Background options" type="button">
+                        <mat-icon>palette</mat-icon>
+                    </button>
+
+                    <mat-menu #otherCardColorMenu="matMenu" class="color-menu-panel">
+                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                            <button *ngFor="let c of colors" 
+                                    class="color-dot" 
+                                    [style.background-color]="c.color" 
+                                    [title]="c.name"
+                                    [class.active-color]="(note.color || '#ffffff') === c.color"
+                                    (click)="changeColor(note, c.color, $event)">
+                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
+                            </button>
+                        </div>
+                    </mat-menu>
+
+                    <button mat-icon-button title="Add image" (click)="openImageUploader(note, fileInput, $event)" type="button">
+                        <mat-icon>image</mat-icon>
+                    </button>
+
+                    <button mat-icon-button [matMenuTriggerFor]="otherLabelMenu" title="Add label" type="button">
+                        <mat-icon>label_outline</mat-icon>
+                    </button>
+
+                    <mat-menu #otherLabelMenu="matMenu" class="label-menu-panel">
+                        <div class="label-menu-header" (click)="$event.stopPropagation()">Label note</div>
+                        <div class="label-menu-item" *ngFor="let label of allLabels" (click)="toggleLabelOnNote(note, label, $event)">
+                            <mat-icon class="check-box-icon">{{ isLabelOnNote(note, label) ? 'check_box' : 'check_box_outline_blank' }}</mat-icon>
+                            <span>{{ label.name }}</span>
+                        </div>
+                    </mat-menu>
+
+                    <!-- In Archive view, this button unarchives; in Notes view, it archives -->
+                    <button mat-icon-button [title]="currentView === 'archive' ? 'Unarchive' : 'Archive'" (click)="toggleArchive(note, $event)" type="button">
+                        <mat-icon>{{ currentView === 'archive' ? 'unarchive' : 'archive' }}</mat-icon>
+                    </button>
+
+                    <button *ngIf="!isSharedNote(note)" mat-icon-button title="Delete note" (click)="trashNote(note, $event)" type="button">
+                        <mat-icon>delete_outline</mat-icon>
+                    </button>
+                </div>
+
+                <!-- Actions for Trash View -->
+                <div class="card-actions trash-actions" *ngIf="currentView === 'trash'" (click)="$event.stopPropagation()">
+                    <button mat-icon-button title="Delete forever" (click)="deletePermanently(note, $event)" type="button">
+                        <mat-icon>delete_forever</mat-icon>
+                    </button>
+
+                    <button mat-icon-button title="Restore" (click)="restoreNote(note, $event)" type="button">
+                        <mat-icon>restore_from_trash</mat-icon>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Edit Note Modal Dialog -->
+<div class="modal-backdrop" *ngIf="isEditModalOpen" (click)="closeEditModal()">
+    <div class="modal-card" [style.background-color]="editColor" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <input type="text" class="modal-title-input" placeholder="Title" [(ngModel)]="editTitle">
+        </div>
+
+        <div class="modal-body">
+            <textarea class="modal-content-input" placeholder="Note" [(ngModel)]="editContent"></textarea>
+
+            <!-- Reminder & Collaborators in Modal -->
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center;">
+                <span class="reminder-chip" *ngIf="editReminder" (click)="$event.stopPropagation()">
+                    <mat-icon class="reminder-chip-icon">access_time</mat-icon>
+                    <span class="reminder-chip-text">{{ formatReminder(editReminder) }}</span>
+                    <mat-icon class="chip-remove" (click)="removeReminderFromEdit($event)">close</mat-icon>
+                </span>
+
+                <div class="collaborator-avatars" *ngIf="selectedNote && getNoteCollaborators(selectedNote).length > 0" style="margin-bottom: 0;">
+                    <div class="collab-avatar-circle" *ngFor="let collab of getNoteCollaborators(selectedNote)" [title]="collab">
+                        {{ collab[0] | uppercase }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <div class="modal-actions">
+                <div class="reminder-menu-container">
+                    <button mat-icon-button type="button" title="Remind me" (click)="toggleEditReminderMenu($event)">
+                        <mat-icon>add_alert</mat-icon>
+                    </button>
+
+                    <div class="reminder-dropdown" *ngIf="editReminderMenuOpen" (click)="$event.stopPropagation()">
+                        <div class="reminder-options">
+                            <div class="reminder-title">Remind me:</div>
+                            <button class="reminder-option-btn" (click)="setReminderTodayEdit()">
+                                <mat-icon>access_time</mat-icon>
+                                <span>Later today (8:00 PM)</span>
+                            </button>
+                            <button class="reminder-option-btn" (click)="setReminderTomorrowEdit()">
+                                <mat-icon>access_time</mat-icon>
+                                <span>Tomorrow (8:00 AM)</span>
+                            </button>
+                            <button class="reminder-option-btn" (click)="setReminderNextWeekEdit()">
+                                <mat-icon>access_time</mat-icon>
+                                <span>Next week (Mon 8:00 AM)</span>
+                            </button>
+                            <div class="custom-datetime-picker-row">
+                                <mat-icon>date_range</mat-icon>
+                                <input type="datetime-local" [(ngModel)]="editCustomReminderTime" />
+                                <button class="picker-save-btn" (click)="setCustomReminderEdit()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button mat-icon-button [matMenuTriggerFor]="editColorMenu" title="Background options" type="button">
+                    <mat-icon>palette</mat-icon>
+                </button>
+
+                <mat-menu #editColorMenu="matMenu" class="color-menu-panel">
+                    <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                        <button *ngFor="let c of colors" 
+                                class="color-dot" 
+                                [style.background-color]="c.color" 
+                                [title]="c.name"
+                                [class.active-color]="editColor === c.color"
+                                (click)="editColor = c.color">
+                            <mat-icon *ngIf="editColor === c.color" class="check-icon">check</mat-icon>
+                        </button>
+                    </div>
+                </mat-menu>
+            </div>
+
+            <button class="save-btn" (click)="saveEditedNote()">Save</button>
+        </div>
+
+    </div>
+</div>
+
+<!-- Collaborator Modal Dialog (Google Keep Style) -->
+<div class="modal-backdrop" *ngIf="isCollaboratorModalOpen" (click)="closeCollaboratorModal()">
+    <div class="modal-card collaborator-modal" (click)="$event.stopPropagation()">
+        <h3 class="collab-header">Collaborators</h3>
+        <div class="collab-divider"></div>
+
+        <!-- Owner Row -->
+        <div class="collab-row">
+            <div class="collab-avatar owner-avatar">
+                {{ getNoteOwnerEmail()[0] | uppercase }}
+            </div>
+            <div class="collab-info">
+                <span class="collab-email font-bold">{{ getNoteOwnerEmail() }}</span>
+                <span class="collab-role"> (Owner)</span>
+            </div>
+        </div>
+
+        <!-- Existing Collaborators List -->
+        <div class="collab-row" *ngFor="let collab of collaboratorsList">
+            <div class="collab-avatar">
+                {{ collab[0] | uppercase }}
+            </div>
+            <div class="collab-info">
+                <span class="collab-email">{{ collab }}</span>
+            </div>
+            <button mat-icon-button class="remove-collab-btn" (click)="removeCollaborator(collab)" title="Remove collaborator">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <!-- Add New Collaborator Input Row -->
+        <div class="collab-row input-row">
+            <div class="collab-avatar add-avatar">
+                <mat-icon>person_add</mat-icon>
+            </div>
+            <div class="collab-input-wrapper">
+                <input type="email" class="collab-input" placeholder="Person or email to share with" [(ngModel)]="newCollaboratorEmail" (keyup.enter)="addCollaborator()" />
+            </div>
+            <button mat-icon-button class="add-collab-btn" (click)="addCollaborator()" title="Add collaborator">
+                <mat-icon>check</mat-icon>
+            </button>
+        </div>
+
+        <div class="collab-footer">
+            <button class="collab-btn cancel-btn" (click)="closeCollaboratorModal()">Cancel</button>
+            <button class="collab-btn save-btn" (click)="saveCollaborators()">Save</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Labels Modal Dialog (Google Keep Style) -->
+<div class="modal-backdrop" *ngIf="isEditLabelsModalOpen" (click)="closeEditLabelsModal()">
+    <div class="modal-card edit-labels-modal" (click)="$event.stopPropagation()">
+        <h3 class="labels-modal-header">Edit labels</h3>
+
+        <!-- Create New Label Row -->
+        <div class="label-row input-row">
+            <button mat-icon-button class="label-icon-btn" (click)="createNewLabel()">
+                <mat-icon>{{ newLabelName.trim() ? 'check' : 'add' }}</mat-icon>
+            </button>
+            <input type="text" class="label-input" placeholder="Create new label" [(ngModel)]="newLabelName" (keyup.enter)="createNewLabel()" />
+            <button mat-icon-button class="label-action-btn" (click)="createNewLabel()" *ngIf="newLabelName.trim()">
+                <mat-icon>check</mat-icon>
+            </button>
+        </div>
+
+        <!-- Existing Labels List -->
+        <div class="label-row" *ngFor="let label of allLabels">
+            <button mat-icon-button class="label-icon-btn delete-btn" (click)="deleteLabel(label); $event.stopPropagation()" title="Delete label">
+                <mat-icon>delete</mat-icon>
+            </button>
+            <input type="text" 
+                   class="label-input" 
+                   [(ngModel)]="label.name" 
+                   (focus)="editingLabelId = label.id || null" 
+                   (keyup.enter)="saveLabelRename(label)" />
+            <button mat-icon-button class="label-action-btn" (click)="editingLabelId === label.id ? saveLabelRename(label) : (editingLabelId = label.id || null)" title="Edit or Save label">
+                <mat-icon>{{ editingLabelId === label.id ? 'check' : 'edit' }}</mat-icon>
+            </button>
+        </div>
+
+        <div class="labels-modal-footer">
+            <button class="done-btn" (click)="closeEditLabelsModal()">Done</button>
+        </div>
+    </div>
+</div>
