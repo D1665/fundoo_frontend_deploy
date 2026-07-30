@@ -641,14 +641,32 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     }
 
     if (this.isLabelOnNote(note, label)) {
+      const updated = {
+        ...note,
+        labels: (note.labels || []).filter(l => (l.id ?? (l as any).labelId) !== label.id)
+      };
+      this.noteService.updateLocalNote(updated);
+
       this.labelService.removeLabelFromNote(label.id, note.id).subscribe({
-        next: () => this.noteService.fetchNotesFromBackend(),
-        error: (err) => console.error('Error detaching label:', err)
+        next: () => {},
+        error: (err) => {
+          console.error('Error detaching label:', err);
+          this.noteService.fetchNotesFromBackend();
+        }
       });
     } else {
+      const updated = {
+        ...note,
+        labels: [...(note.labels || []), label]
+      };
+      this.noteService.updateLocalNote(updated);
+
       this.labelService.addLabelToNote(label.id, note.id).subscribe({
-        next: () => this.noteService.fetchNotesFromBackend(),
-        error: (err) => console.error('Error attaching label:', err)
+        next: () => {},
+        error: (err) => {
+          console.error('Error attaching label:', err);
+          this.noteService.fetchNotesFromBackend();
+        }
       });
     }
   }
@@ -673,9 +691,18 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const updated = {
+      ...note,
+      labels: (note.labels || []).filter(l => (l.id ?? (l as any).labelId) !== labelId)
+    };
+    this.noteService.updateLocalNote(updated);
+
     this.labelService.removeLabelFromNote(labelId, note.id).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
-      error: (err) => console.error('Error removing label chip:', err)
+      next: () => {},
+      error: (err) => {
+        console.error('Error removing label chip:', err);
+        this.noteService.fetchNotesFromBackend();
+      }
     });
   }
 
@@ -701,18 +728,23 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
         } catch (err) {
           console.error('Error saving image to localStorage:', err);
         }
-        targetNote.image = base64Image;
-
+        
         const cleanContent = targetNote.content || targetNote.description || '';
         const contentWithImg = cleanContent + '\n<!--IMG:' + base64Image + '-->';
+
+        const updated = { ...targetNote, image: base64Image, content: contentWithImg };
+        this.noteService.updateLocalNote(updated);
 
         this.noteService.updateNote(noteId, {
           title: targetNote.title,
           content: contentWithImg,
           color: targetNote.color
         }).subscribe({
-          next: () => this.noteService.fetchNotesFromBackend(),
-          error: () => this.noteService.fetchNotesFromBackend()
+          next: () => {},
+          error: () => {
+            this.snackbar.error('Failed to upload image');
+            this.noteService.fetchNotesFromBackend();
+          }
         });
 
         this.targetImageNote = null;
@@ -733,17 +765,24 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
   removeNoteImage(note: Note, event: MouseEvent): void {
     event.stopPropagation();
-    note.image = undefined;
     if (note.id) {
+      note.image = undefined;
       localStorage.removeItem('note_image_' + note.id);
       const cleanContent = note.content || note.description || '';
+
+      const updated = { ...note, image: undefined, content: cleanContent };
+      this.noteService.updateLocalNote(updated);
+
       this.noteService.updateNote(note.id, {
         title: note.title,
         content: cleanContent,
         color: note.color
       }).subscribe({
-        next: () => this.noteService.fetchNotesFromBackend(),
-        error: () => this.noteService.fetchNotesFromBackend()
+        next: () => {},
+        error: () => {
+          this.snackbar.error('Failed to remove image');
+          this.noteService.fetchNotesFromBackend();
+        }
       });
     }
   }
