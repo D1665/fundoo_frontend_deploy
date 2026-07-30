@@ -370,7 +370,6 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     };
 
     this.noteService.updateLocalNote(localUpdated);
-    this.closeEditModal();
 
     const reminderChanged = this.editReminder !== this.selectedNote.reminder;
     if (reminderChanged) {
@@ -409,6 +408,8 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
         console.error('Error updating note in backend:', err);
       }
     });
+
+    this.closeEditModal();
   }
 
   // Collaborator Functionality
