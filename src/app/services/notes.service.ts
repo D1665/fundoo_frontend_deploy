@@ -276,8 +276,10 @@ export class NoteService {
    * Smart Fetcher based on Active View (Notes, Archive, Trash)
    * Automatically combines user's own notes AND notes shared with user via Collaborator
    */
-  fetchNotesFromBackend(): void {
-    this.loadingSubject.next(true);
+  fetchNotesFromBackend(showLoader: boolean = false): void {
+    if (showLoader) {
+      this.loadingSubject.next(true);
+    }
     const view = this.currentViewSubject.getValue();
 
     if (view === 'archive') {

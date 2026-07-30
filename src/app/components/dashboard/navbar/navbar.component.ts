@@ -43,7 +43,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isRefreshing = true;
     
     const startTime = Date.now();
-    this.noteService.fetchNotesFromBackend();
+    this.noteService.fetchNotesFromBackend(true);
 
     // Subscribe to loading$ to detect completion and enforce minimum 600ms duration
     const sub = this.noteService.loading$.subscribe((loadingState) => {
