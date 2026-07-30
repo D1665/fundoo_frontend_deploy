@@ -892,6 +892,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   formatReminder(isoString: string | null): string {
     if (!isoString) return '';
     const date = this.parseReminderDate(isoString)!;
+    console.log("DIAGNOSTIC formatReminder raw:", isoString, "parsed Date:", date.toString());
     return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
