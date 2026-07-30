@@ -212,8 +212,11 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.updateLocalNote(updated);
 
     this.noteService.pinNote(note.id, note).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
-      error: () => this.noteService.fetchNotesFromBackend()
+      next: () => {},
+      error: () => {
+        this.snackbar.error('Failed to pin note');
+        this.noteService.fetchNotesFromBackend();
+      }
     });
   }
 
@@ -239,8 +242,11 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.removeLocalNote(note.id);
 
     this.noteService.archiveNote(note.id, note).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
-      error: () => this.noteService.fetchNotesFromBackend()
+      next: () => {},
+      error: () => {
+        this.snackbar.error('Failed to archive note');
+        this.noteService.fetchNotesFromBackend();
+      }
     });
   }
 
@@ -251,8 +257,11 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.removeLocalNote(note.id);
 
     this.noteService.trashNote(note.id, note).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
-      error: () => this.noteService.fetchNotesFromBackend()
+      next: () => {},
+      error: () => {
+        this.snackbar.error('Failed to trash note');
+        this.noteService.fetchNotesFromBackend();
+      }
     });
   }
 
@@ -263,8 +272,11 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.removeLocalNote(note.id);
 
     this.noteService.restoreNote(note.id).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
-      error: () => this.noteService.fetchNotesFromBackend()
+      next: () => {},
+      error: () => {
+        this.snackbar.error('Failed to restore note');
+        this.noteService.fetchNotesFromBackend();
+      }
     });
   }
 
@@ -275,9 +287,10 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.removeLocalNote(note.id);
 
     this.noteService.deleteNote(note.id).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
+      next: () => {},
       error: (e) => {
         console.error('Error deleting note permanently:', e);
+        this.snackbar.error('Failed to delete note');
         this.noteService.fetchNotesFromBackend();
       }
     });
@@ -291,8 +304,11 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.updateLocalNote(updated);
 
     this.noteService.changeColor(note.id, color).subscribe({
-      next: () => this.noteService.fetchNotesFromBackend(),
-      error: () => this.noteService.fetchNotesFromBackend()
+      next: () => {},
+      error: () => {
+        this.snackbar.error('Failed to change color');
+        this.noteService.fetchNotesFromBackend();
+      }
     });
   }
 
@@ -360,9 +376,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     if (reminderChanged) {
       if (this.editReminder) {
         this.noteService.setReminder(noteId, this.editReminder).subscribe({
-          next: () => {
+          next: (res: any) => {
             this.snackbar.success('Reminder updated successfully');
-            this.noteService.fetchNotesFromBackend();
+            if (res && res.data) {
+              const norm = this.noteService.normalizeNote(res.data);
+              this.noteService.updateLocalNote(norm);
+            }
           },
           error: (err) => {
             console.error('Error setting reminder:', err);
@@ -373,11 +392,17 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
         });
       } else {
         this.noteService.deleteReminder(noteId).subscribe({
-          next: () => {
+          next: (res: any) => {
             this.snackbar.success('Reminder removed');
-            this.noteService.fetchNotesFromBackend();
+            if (res && res.data) {
+              const norm = this.noteService.normalizeNote(res.data);
+              this.noteService.updateLocalNote(norm);
+            }
           },
-          error: (err) => console.error('Error deleting reminder:', err)
+          error: (err) => {
+            console.error('Error deleting reminder:', err);
+            this.noteService.fetchNotesFromBackend();
+          }
         });
       }
     }
@@ -445,12 +470,17 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
         }
         this.newCollaboratorEmail = '';
         this.loadCollaborators(this.collaboratorNote!.id!);
+        if (this.collaboratorNote) {
+          const updated = {
+            ...this.collaboratorNote,
+            collaborators: [...(this.collaboratorNote.collaborators || []), email]
+          };
+          this.noteService.updateLocalNote(updated);
+          this.collaboratorNote = updated;
+        }
       },
       error: (err) => {
         console.error('Error adding collaborator:', err);
-        if (!this.collaboratorsList.includes(email)) {
-          this.collaboratorsList.push(email);
-        }
         this.newCollaboratorEmail = '';
       }
     });
@@ -462,15 +492,17 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.removeCollaborator(this.collaboratorNote.id, email).subscribe({
       next: () => {
         this.collaboratorsList = this.collaboratorsList.filter(e => e !== email);
-        if (this.collaboratorNote && this.collaboratorNote.id) {
-          this.loadCollaborators(this.collaboratorNote.id);
+        if (this.collaboratorNote) {
+          const updated = {
+            ...this.collaboratorNote,
+            collaborators: (this.collaboratorNote.collaborators || []).filter(e => e !== email)
+          };
+          this.noteService.updateLocalNote(updated);
+          this.collaboratorNote = updated;
         }
-        this.noteService.fetchNotesFromBackend();
       },
       error: (err) => {
         console.error('Error removing collaborator:', err);
-        this.collaboratorsList = this.collaboratorsList.filter(e => e !== email);
-        this.noteService.fetchNotesFromBackend();
       }
     });
   }
@@ -480,18 +512,22 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       const email = this.newCollaboratorEmail.trim();
       this.noteService.addCollaborator(this.collaboratorNote.id, email).subscribe({
         next: () => {
+          if (this.collaboratorNote) {
+            const updated = {
+              ...this.collaboratorNote,
+              collaborators: [...(this.collaboratorNote.collaborators || []), email]
+            };
+            this.noteService.updateLocalNote(updated);
+          }
           this.closeCollaboratorModal();
-          this.noteService.fetchNotesFromBackend();
         },
         error: (err) => {
           console.error('Error adding collaborator:', err);
           this.closeCollaboratorModal();
-          this.noteService.fetchNotesFromBackend();
         }
       });
     } else {
       this.closeCollaboratorModal();
-      this.noteService.fetchNotesFromBackend();
     }
   }
 
@@ -765,9 +801,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     const localStr = this.formatLocalISO(today);
     this.activeReminderNoteId = null;
     this.noteService.setReminder(note.id, localStr).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.snackbar.success('Reminder set successfully');
-        this.noteService.fetchNotesFromBackend();
+        if (res && res.data) {
+          const norm = this.noteService.normalizeNote(res.data);
+          this.noteService.updateLocalNote(norm);
+        }
       },
       error: (err) => {
         console.error('Error setting reminder:', err);
@@ -786,9 +825,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     const localStr = this.formatLocalISO(tomorrow);
     this.activeReminderNoteId = null;
     this.noteService.setReminder(note.id, localStr).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.snackbar.success('Reminder set successfully');
-        this.noteService.fetchNotesFromBackend();
+        if (res && res.data) {
+          const norm = this.noteService.normalizeNote(res.data);
+          this.noteService.updateLocalNote(norm);
+        }
       },
       error: (err) => {
         console.error('Error setting reminder:', err);
@@ -812,9 +854,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     const localStr = this.formatLocalISO(nextWeek);
     this.activeReminderNoteId = null;
     this.noteService.setReminder(note.id, localStr).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.snackbar.success('Reminder set successfully');
-        this.noteService.fetchNotesFromBackend();
+        if (res && res.data) {
+          const norm = this.noteService.normalizeNote(res.data);
+          this.noteService.updateLocalNote(norm);
+        }
       },
       error: (err) => {
         console.error('Error setting reminder:', err);
@@ -840,9 +885,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       const localStr = this.formatLocalISO(localDate);
       this.activeReminderNoteId = null;
       this.noteService.setReminder(note.id, localStr).subscribe({
-        next: () => {
+        next: (res: any) => {
           this.snackbar.success('Reminder set successfully');
-          this.noteService.fetchNotesFromBackend();
+          if (res && res.data) {
+            const norm = this.noteService.normalizeNote(res.data);
+            this.noteService.updateLocalNote(norm);
+          }
         },
         error: (err) => {
           console.error('Error setting custom reminder:', err);
@@ -857,9 +905,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     if (event) event.stopPropagation();
     if (!note.id) return;
     this.noteService.deleteReminder(note.id).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.snackbar.success('Reminder removed');
-        this.noteService.fetchNotesFromBackend();
+        if (res && res.data) {
+          const norm = this.noteService.normalizeNote(res.data);
+          this.noteService.updateLocalNote(norm);
+        }
       },
       error: (err) => console.error('Error deleting reminder:', err)
     });
