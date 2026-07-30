@@ -1101,4 +1101,8 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     }
     return note.labels || [];
   }
+
+  trackByNoteId(index: number, note: Note): number | undefined {
+    return note.id;
+  }
 }

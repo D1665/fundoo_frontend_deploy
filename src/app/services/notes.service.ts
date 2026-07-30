@@ -35,6 +35,8 @@ export class NoteService {
   private openEditLabelsModalSubject = new Subject<void>();
   public openEditLabelsModal$ = this.openEditLabelsModalSubject.asObservable();
 
+  private isFetching = false;
+
   constructor(private http: HttpClient) {}
 
   setView(view: string): void {
@@ -277,6 +279,12 @@ export class NoteService {
    * Automatically combines user's own notes AND notes shared with user via Collaborator
    */
   fetchNotesFromBackend(showLoader: boolean = false): void {
+    if (this.isFetching) {
+      console.log('[NoteService] Fetch already in progress, skipping duplicate call.');
+      return;
+    }
+    this.isFetching = true;
+
     if (showLoader) {
       this.loadingSubject.next(true);
     }
@@ -300,10 +308,12 @@ export class NoteService {
           });
 
           this.notesSubject.next(Array.from(combinedMap.values()));
+          this.isFetching = false;
           this.loadingSubject.next(false);
         },
         error: (err) => {
           console.error('Error fetching archived/shared notes:', err);
+          this.isFetching = false;
           this.loadingSubject.next(false);
         }
       });
@@ -312,10 +322,12 @@ export class NoteService {
         next: (resp) => {
           const raw = this.extractNotesList(resp);
           this.notesSubject.next(raw.map(n => this.normalizeNote(n)));
+          this.isFetching = false;
           this.loadingSubject.next(false);
         },
         error: (err) => {
           console.error('Error fetching trashed notes:', err);
+          this.isFetching = false;
           this.loadingSubject.next(false);
         }
       });
@@ -338,10 +350,12 @@ export class NoteService {
           });
 
           this.notesSubject.next(Array.from(combinedMap.values()));
+          this.isFetching = false;
           this.loadingSubject.next(false);
         },
         error: (err) => {
           console.error('Error fetching notes:', err);
+          this.isFetching = false;
           this.loadingSubject.next(false);
         }
       });

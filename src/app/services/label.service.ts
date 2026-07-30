@@ -16,6 +16,8 @@ export class LabelService {
   private labelsSubject = new BehaviorSubject<Label[]>([]);
   public labels$ = this.labelsSubject.asObservable();
 
+  private isFetching = false;
+
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
@@ -62,13 +64,22 @@ export class LabelService {
    * GET /api/labels - Fetch all user labels
    */
   fetchLabels(): void {
+    if (this.isFetching) {
+      console.log('[LabelService] Fetch already in progress, skipping duplicate call.');
+      return;
+    }
+    this.isFetching = true;
   
     this.http.get<ApiResponse<Label[]>>(this.baseUrl, { headers: this.getHeaders() }).subscribe({
       next: (resp) => {
         const labels = this.extractLabelList(resp);
         this.labelsSubject.next(labels);
+        this.isFetching = false;
       },
-      error: (err) => console.error('Error fetching labels:', err)
+      error: (err) => {
+        console.error('Error fetching labels:', err);
+        this.isFetching = false;
+      }
     });
   }
 

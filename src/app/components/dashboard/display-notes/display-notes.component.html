@@ -26,7 +26,7 @@
     <div class="notes-section" *ngIf="!loading && currentView === 'notes' && pinnedNotes.length > 0">
         <h3 class="section-title">PINNED</h3>
         <div class="notes-grid" [class.list-view]="!isGridView">
-            <div *ngFor="let note of pinnedNotes" 
+            <div *ngFor="let note of pinnedNotes; trackBy: trackByNoteId" 
                  class="note-card" 
                  [class.active-menu-card]="activeReminderNoteId === note.id"
                  [style.background-color]="note.color || '#ffffff'"
@@ -157,7 +157,7 @@
         <h3 class="section-title" *ngIf="currentView === 'trash'">TRASH</h3>
 
         <div class="notes-grid" [class.list-view]="!isGridView">
-            <div *ngFor="let note of otherNotes" 
+            <div *ngFor="let note of otherNotes; trackBy: trackByNoteId" 
                  class="note-card" 
                  [class.trash-card]="currentView === 'trash'"
                  [class.active-menu-card]="activeReminderNoteId === note.id"
