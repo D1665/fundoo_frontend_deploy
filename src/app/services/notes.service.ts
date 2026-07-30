@@ -124,9 +124,8 @@ export class NoteService {
       if (cached) extractedImage = cached;
     }
 
-    const currentView = this.currentViewSubject.getValue();
-    const isArchived = currentView === 'archive' ? true : Boolean(raw.archived ?? raw.isArchive ?? raw.isArchived ?? false);
-    const isTrashed = currentView === 'trash' ? true : Boolean(raw.trashed ?? raw.isTrash ?? raw.isTrashed ?? false);
+    const isArchived = Boolean(raw.archived ?? raw.isArchive ?? raw.isArchived ?? false);
+    const isTrashed = Boolean(raw.trashed ?? raw.isTrash ?? raw.isTrashed ?? false);
 
     let collabs: string[] = [];
     if (raw.collaborators && Array.isArray(raw.collaborators)) {
