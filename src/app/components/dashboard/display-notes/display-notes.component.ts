@@ -95,25 +95,10 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       this.filterNotes();
       this.setupReminderTimers(notes);
 
-      // Fetch collaborators for each note
+      // Populate collaborators from eager-loaded note data
       notes.forEach(note => {
         if (note.id) {
-          this.noteService.getCollaborators(note.id).subscribe({
-            next: (res: any) => {
-              let list: string[] = [];
-              if (res && Array.isArray(res.data)) {
-                list = res.data.map((item: any) =>
-                  typeof item === 'string' ? item : (item.email || item.userName || '')
-                ).filter(Boolean);
-              } else if (Array.isArray(res)) {
-                list = res.map((item: any) =>
-                  typeof item === 'string' ? item : (item.email || '')
-                ).filter(Boolean);
-              }
-              this.noteCollaboratorsMap[note.id!] = list;
-            },
-            error: (err) => console.error('Error fetching collaborators for note ' + note.id, err)
-          });
+          this.noteCollaboratorsMap[note.id] = note.collaborators || [];
         }
       });
     });
