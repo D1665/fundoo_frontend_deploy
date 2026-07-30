@@ -883,9 +883,9 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
   parseReminderDate(isoString: string | null): Date | null {
     if (!isoString) return null;
-    const normalizedString = (isoString.includes('Z') || isoString.includes('+') || isoString.includes('-')) 
-                             ? isoString 
-                             : isoString + 'Z';
+    const hasTimezone = isoString.includes('Z') || 
+                        (isoString.includes('T') && (isoString.indexOf('+', isoString.indexOf('T')) !== -1 || isoString.lastIndexOf('-') > isoString.indexOf('T')));
+    const normalizedString = hasTimezone ? isoString : isoString + 'Z';
     return new Date(normalizedString);
   }
 

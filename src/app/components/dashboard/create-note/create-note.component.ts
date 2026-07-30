@@ -384,12 +384,17 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
     this.customReminderTime = '';
   }
 
+  parseReminderDate(isoString: string | null): Date | null {
+    if (!isoString) return null;
+    const hasTimezone = isoString.includes('Z') || 
+                        (isoString.includes('T') && (isoString.indexOf('+', isoString.indexOf('T')) !== -1 || isoString.lastIndexOf('-') > isoString.indexOf('T')));
+    const normalizedString = hasTimezone ? isoString : isoString + 'Z';
+    return new Date(normalizedString);
+  }
+
   formatReminder(isoString: string | null): string {
     if (!isoString) return '';
-    const normalizedString = (isoString.includes('Z') || isoString.includes('+') || isoString.includes('-')) 
-                             ? isoString 
-                             : isoString + 'Z';
-    const date = new Date(normalizedString);
+    const date = this.parseReminderDate(isoString)!;
     return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 }
