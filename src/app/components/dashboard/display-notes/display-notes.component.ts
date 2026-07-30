@@ -327,7 +327,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.editContent = rawC;
     this.editColor = note.color || '#ffffff';
     this.editReminder = note.reminder || null;
-    this.editCustomReminderTime = note.reminder ? this.getLocalISOString(new Date(note.reminder)) : '';
+    this.editCustomReminderTime = note.reminder ? this.getLocalISOString(this.parseReminderDate(note.reminder)!) : '';
     this.isEditModalOpen = true;
   }
 
@@ -745,7 +745,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.notes.forEach(note => {
       if (note.id) {
         if (note.reminder) {
-          this.customReminderTimeMap[note.id] = this.getLocalISOString(new Date(note.reminder));
+          this.customReminderTimeMap[note.id] = this.getLocalISOString(this.parseReminderDate(note.reminder)!);
         } else if (!this.customReminderTimeMap[note.id]) {
           this.customReminderTimeMap[note.id] = defaultTime;
         }
@@ -871,12 +871,17 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     });
   }
 
-  formatReminder(isoString: string | null): string {
-    if (!isoString) return '';
+  parseReminderDate(isoString: string | null): Date | null {
+    if (!isoString) return null;
     const normalizedString = (isoString.includes('Z') || isoString.includes('+') || isoString.includes('-')) 
                              ? isoString 
                              : isoString + 'Z';
-    const date = new Date(normalizedString);
+    return new Date(normalizedString);
+  }
+
+  formatReminder(isoString: string | null): string {
+    if (!isoString) return '';
+    const date = this.parseReminderDate(isoString)!;
     return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
 
@@ -951,7 +956,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     // Setup timers for future reminders
     notes.forEach(note => {
       if (note.id !== undefined && note.reminder && !note.trashed) {
-        const reminderTime = new Date(note.reminder).getTime();
+        const reminderTime = this.parseReminderDate(note.reminder)!.getTime();
         const now = new Date().getTime();
         const delay = reminderTime - now;
 
