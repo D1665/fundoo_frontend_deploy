@@ -843,7 +843,8 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     if (!note.id) return;
     const time = this.customReminderTimeMap[note.id];
     if (time) {
-      const localStr = time + ':00';
+      const localDate = new Date(time);
+      const localStr = this.formatLocalISO(localDate);
       this.activeReminderNoteId = null;
       this.noteService.setReminder(note.id, localStr).subscribe({
         next: () => {
