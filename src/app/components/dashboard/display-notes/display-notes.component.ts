@@ -287,7 +287,9 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.noteService.removeLocalNote(note.id);
 
     this.noteService.deleteNote(note.id).subscribe({
-      next: () => {},
+      next: () => {
+        this.snackbar.success('Note deleted permanently');
+      },
       error: (e) => {
         console.error('Error deleting note permanently:', e);
         this.snackbar.error('Failed to delete note');
