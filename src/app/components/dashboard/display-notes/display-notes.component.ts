@@ -838,12 +838,19 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     });
   }
 
+  parseLocalDateTimePickerValue(dateTimeStr: string): Date {
+    const [datePart, timePart] = dateTimeStr.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute, 0, 0);
+  }
+
   setCustomReminder(note: Note, event: Event): void {
     if (event) event.stopPropagation();
     if (!note.id) return;
     const time = this.customReminderTimeMap[note.id];
     if (time) {
-      const localDate = new Date(time);
+      const localDate = this.parseLocalDateTimePickerValue(time);
       const localStr = this.formatLocalISO(localDate);
       this.activeReminderNoteId = null;
       this.noteService.setReminder(note.id, localStr).subscribe({
@@ -917,7 +924,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
   setCustomReminderEdit(): void {
     if (this.editCustomReminderTime) {
-      const localDate = new Date(this.editCustomReminderTime);
+      const localDate = this.parseLocalDateTimePickerValue(this.editCustomReminderTime);
       this.editReminder = this.formatLocalISO(localDate);
       this.editReminderMenuOpen = false;
     }

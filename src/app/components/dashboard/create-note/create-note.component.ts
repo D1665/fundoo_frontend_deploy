@@ -364,9 +364,16 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
     this.reminder = this.formatLocalISO(nextWeek);
   }
 
+  parseLocalDateTimePickerValue(dateTimeStr: string): Date {
+    const [datePart, timePart] = dateTimeStr.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute, 0, 0);
+  }
+
   setCustomReminder(): void {
     if (this.customReminderTime) {
-      const localDate = new Date(this.customReminderTime);
+      const localDate = this.parseLocalDateTimePickerValue(this.customReminderTime);
       this.reminder = this.formatLocalISO(localDate);
     }
   }
