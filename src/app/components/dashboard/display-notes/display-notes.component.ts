@@ -849,6 +849,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     if (event) event.stopPropagation();
     if (!note.id) return;
     const time = this.customReminderTimeMap[note.id];
+    console.log("DIAGNOSTIC: Selected time in timepicker before save:", time);
     if (time) {
       const localDate = this.parseLocalDateTimePickerValue(time);
       const localStr = this.formatLocalISO(localDate);
