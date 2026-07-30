@@ -6,18 +6,19 @@ import { SignUpComponent } from './components/sign-up/sign-up.component';
 import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { authGuard, guestGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: 'signin', pathMatch: 'full' },
-  { path: 'signin', component: SignInComponent },
-  { path: 'signup', component: SignUpComponent },
-  { path: 'forgot', component: ForgotPasswordComponent },
-  { path: 'reset-password', component: ResetPasswordComponent },
+  { path: 'signin', component: SignInComponent, canActivate: [guestGuard] },
+  { path: 'signup', component: SignUpComponent, canActivate: [guestGuard] },
+  { path: 'forgot', component: ForgotPasswordComponent, canActivate: [guestGuard] },
+  { path: 'reset-password', component: ResetPasswordComponent, canActivate: [guestGuard] },
   { path: 'dashboard', redirectTo: 'dashboard/home', pathMatch: 'full' },
-  { path: 'dashboard/home', component: DashboardComponent },
-  { path: 'dashboard/reminders', component: DashboardComponent },
-  { path: 'dashboard/archive', component: DashboardComponent },
-  { path: 'dashboard/trash', component: DashboardComponent },
+  { path: 'dashboard/home', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'dashboard/reminders', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'dashboard/archive', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'dashboard/trash', component: DashboardComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: 'signin' }
 ];
 
