@@ -135,6 +135,53 @@
   background-color: #1765cc;
 }
 
+.text-input:disabled {
+  background-color: #f1f3f4;
+  color: #80868b;
+  cursor: not-allowed;
+}
+
+.btn-primary:disabled {
+  background-color: #9cbdf2;
+  cursor: not-allowed;
+}
+
+.disabled-link {
+  color: #80868b !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+  text-decoration: none !important;
+}
+
+.btn-loader-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.field-error {
+  color: #d93025;
+  font-size: 11px;
+  text-align: left;
+  margin-top: 4px;
+}
+
 .illustration-side {
   flex: 1;
   background: #ffffff;

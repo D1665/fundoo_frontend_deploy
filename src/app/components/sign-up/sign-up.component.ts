@@ -24,6 +24,8 @@ export class SignUpComponent {
   passwordError: string = '';
   confirmPasswordError: string = '';
 
+  isLoading: boolean = false;
+
   constructor(
     private router: Router,
     private userService: UserService,
@@ -127,12 +129,14 @@ export class SignUpComponent {
   }
 
   onSubmit(): void {
+    if (this.isLoading) return;
+
     const isFirstNameValid = this.validateFirstName();
     const isLastNameValid = this.validateLastName();
     const isEmailValid = this.validateEmail();
     const isPasswordValid = this.validatePassword();
     const isConfirmPasswordValid = this.validateConfirmPassword();
-
+ 
     if (
       !isFirstNameValid ||
       !isLastNameValid ||
@@ -142,26 +146,29 @@ export class SignUpComponent {
     ) {
       return;
     }
-
+ 
     this.errorMessage = '';
     this.successMessage = '';
-
+    this.isLoading = true;
+ 
     const payload = {
       firstName: this.firstName,
       lastName: this.lastName,
       email: this.email,
       password: this.password
     };
-
+ 
     this.userService.register(payload).subscribe({
       next: (res: string) => {
         this.successMessage = res || 'Registration successful! Redirecting to sign in...';
+        this.snackbar.success('Registration Successful');
         setTimeout(() => {
+          this.isLoading = false;
           this.router.navigate(['/signin']);
         }, 2000);
-        this.snackbar.success('Registration Successful');
       },
       error: (err: any) => {
+        this.isLoading = false;
         console.error(err);
         let errorMsg = 'Registration failed.';
         if (err.status === 0) {
@@ -185,7 +192,6 @@ export class SignUpComponent {
           errorMsg = 'Registration failed. Please try again.';
         }
         
-        // Display error in upper toast
         this.snackbar.error(errorMsg);
         this.errorMessage = '';
       }

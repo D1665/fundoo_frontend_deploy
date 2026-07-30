@@ -18,6 +18,7 @@
           class="text-input"
           (input)="validateEmail()"
           [class.error-input]="emailError"
+          [disabled]="isLoading"
         />
         <p class="field-error" *ngIf="emailError">{{ emailError }}</p>
       </div>
@@ -32,6 +33,7 @@
           class="text-input"
           [class.error-input]="passwordError"
           (input)="validatePassword()"
+          [disabled]="isLoading"
         />
         <p class="field-error" *ngIf="passwordError">{{ passwordError }}</p>
       </div>
@@ -40,12 +42,18 @@
       <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
       <div class="actions-row">
-        <a class="link" (click)="goToForgotPassword()">Forgot password?</a>
+        <a class="link" [class.disabled-link]="isLoading" (click)="!isLoading && goToForgotPassword()">Forgot password?</a>
       </div>
 
       <div class="bottom-row">
-        <a class="link create-account" (click)="goToSignUp()">Create account</a>
-        <button type="submit" class="btn-primary">Sign in</button>
+        <a class="link create-account" [class.disabled-link]="isLoading" (click)="!isLoading && goToSignUp()">Create account</a>
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Sign in</span>
+          <span *ngIf="isLoading" class="btn-loader-container">
+            <span class="btn-spinner"></span>
+            Signing in...
+          </span>
+        </button>
       </div>
     </form>
   </div>

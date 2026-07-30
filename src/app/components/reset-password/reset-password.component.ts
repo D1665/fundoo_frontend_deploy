@@ -17,6 +17,8 @@ export class ResetPasswordComponent implements OnInit {
   newPasswordError = '';
   confirmPasswordError = '';
 
+  isLoading: boolean = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -62,6 +64,7 @@ export class ResetPasswordComponent implements OnInit {
   }
 
   onSubmit(): void {
+    if (this.isLoading) return;
     if (!this.token) {
       this.errorMessage = 'Missing reset token.';
       return;
@@ -75,16 +78,19 @@ export class ResetPasswordComponent implements OnInit {
 
     this.errorMessage = '';
     this.successMessage = '';
+    this.isLoading = true;
 
     this.userService.resetPassword(this.token, this.newPassword).subscribe({
       next: (res) => {
         this.snackbar.success('Password Reset Successfully');
         this.successMessage = 'Password reset successful! Redirecting to login...';
         setTimeout(() => {
+          this.isLoading = false;
           this.router.navigate(['/signin']);
         }, 3000);
       },
       error: (err) => {
+        this.isLoading = false;
         console.error(err);
         this.snackbar.error('Password Reset Failed');
         this.errorMessage = err.error?.message || 'Failed to reset password. Please try again.';

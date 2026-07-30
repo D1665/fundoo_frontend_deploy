@@ -20,6 +20,7 @@
               class="text-input"
               [class.error-input]="firstNameError"
               (input)="validateFirstName()"
+              [disabled]="isLoading"
             />
             <small class="field-error">
               {{firstNameError}}
@@ -35,7 +36,7 @@
               class="text-input"
               [class.error-input]="lastNameError"
               (input)="validateLastName()"
-              
+              [disabled]="isLoading"
             />
             <small class="field-error">
               {{ lastNameError }}
@@ -54,6 +55,7 @@
               class="text-input full"
               [class.error-input]="emailError"
               (input)="validateEmail()"
+              [disabled]="isLoading"
             />
             <small class="field-error">
               {{ emailError }}
@@ -72,6 +74,7 @@
               class="text-input"
               [class.error-input]="passwordError"
               (input)="validatePassword()"
+              [disabled]="isLoading"
             />
             <small class="field-error">
               {{ passwordError }}
@@ -87,6 +90,7 @@
               class="text-input"
               [class.error-input]="confirmPasswordError"
               (input)="validateConfirmPassword()"
+              [disabled]="isLoading"
             />
             <small class="field-error">
               {{ confirmPasswordError }}
@@ -94,8 +98,8 @@
           </div>
         </div>
 
-        <label class="checkbox-row">
-          <input type="checkbox" [(ngModel)]="showPassword" name="showPasswordToggle" (change)="toggleShowPassword()" />
+        <label class="checkbox-row" [class.disabled-link]="isLoading">
+          <input type="checkbox" [(ngModel)]="showPassword" name="showPasswordToggle" (change)="toggleShowPassword()" [disabled]="isLoading" />
           Show password
         </label>
 
@@ -103,8 +107,14 @@
         <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
         <div class="bottom-row">
-          <a class="link" (click)="goToSignIn()">Sign in instead</a>
-          <button type="submit" class="btn-primary">Submit</button>
+          <a class="link" [class.disabled-link]="isLoading" (click)="!isLoading && goToSignIn()">Sign in instead</a>
+          <button type="submit" class="btn-primary" [disabled]="isLoading">
+            <span *ngIf="!isLoading">Submit</span>
+            <span *ngIf="isLoading" class="btn-loader-container">
+              <span class="btn-spinner"></span>
+              Submitting...
+            </span>
+          </button>
         </div>
       </form>
     </div>

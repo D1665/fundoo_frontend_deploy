@@ -18,6 +18,8 @@ export class SignInComponent {
   emailError: string = '';
   passwordError: string = '';
 
+  isLoading: boolean = false;
+
   constructor(
     private router: Router,
     private userService: UserService,
@@ -54,6 +56,7 @@ export class SignInComponent {
   }
 
   onSignIn(): void {
+    if (this.isLoading) return;
 
     console.log("signin button is clicked");
     const isEmailValid = this.validateEmail();
@@ -65,6 +68,7 @@ export class SignInComponent {
   
     this.errorMessage = '';
     this.successMessage = '';
+    this.isLoading = true;
   
     const payload = {
       email: this.email,
@@ -91,12 +95,14 @@ export class SignInComponent {
         this.successMessage = response.message;
         this.snackbar.success('Login Successful');
         setTimeout(() => {
+          this.isLoading = false;
           this.router.navigate(['/dashboard']);
         }, 1000);
 
       },
   
       error: (error) => {
+        this.isLoading = false;
         console.error(error);
         if (error.status === 0) {
           this.errorMessage = 'Cannot connect to backend. Please check CORS configuration on Render.';
