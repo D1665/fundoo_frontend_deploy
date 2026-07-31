@@ -446,7 +446,7 @@
         </div>
 
         <!-- Existing Labels List -->
-        <div class="label-row" *ngFor="let label of allLabels">
+        <div class="label-row" *ngFor="let label of editableLabels">
             <button mat-icon-button class="label-icon-btn delete-btn" (click)="deleteLabel(label); $event.stopPropagation()" title="Delete label">
                 <mat-icon>delete</mat-icon>
             </button>

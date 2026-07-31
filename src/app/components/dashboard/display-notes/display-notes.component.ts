@@ -38,6 +38,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   // Edit Labels Modal state
   isEditLabelsModalOpen = false;
   allLabels: Label[] = [];
+  editableLabels: Label[] = [];
   newLabelName = '';
   editingLabelId: number | null = null;
   editingOriginalName = '';
@@ -123,9 +124,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     });
 
     this.labelsSub = this.labelService.labels$.subscribe(labels => {
-      if (!this.isEditLabelsModalOpen) {
-        this.allLabels = labels.map(l => ({ ...l }));
-      }
+      this.allLabels = labels;
     });
 
     this.viewModeSub = this.noteService.isGridView$.subscribe((isGrid) => {
@@ -550,6 +549,10 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.editingLabelId = null;
     this.editingOriginalName = '';
     this.labelService.fetchLabels();
+    // Deep-copy so modal edits don't affect note card chips
+    setTimeout(() => {
+      this.editableLabels = this.allLabels.map(l => ({ ...l }));
+    });
   }
 
   closeEditLabelsModal(): void {
@@ -577,12 +580,12 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.newLabelName = '';
     this.labelService.createLabel(name).subscribe({
       next: () => {
-        // Refresh sidebar
+        // Refresh sidebar (allLabels updated via subscription)
         this.labelService.fetchLabels();
-        // Manually refresh modal's local copy
+        // Refresh modal's separate copy
         this.labelService.getAllLabels().subscribe(resp => {
           const list = (resp as any)?.data || resp || [];
-          this.allLabels = (Array.isArray(list) ? list : []).map((l: any) => ({
+          this.editableLabels = (Array.isArray(list) ? list : []).map((l: any) => ({
             id: l.id ?? l.labelId,
             name: l.name || l.labelName || ''
           }));
@@ -609,13 +612,13 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
     this.labelService.updateLabel(labelId, newName).subscribe({
       next: () => {
-        // Refresh sidebar
+        // Refresh sidebar (allLabels updated via subscription)
         this.labelService.fetchLabels();
         this.noteService.fetchNotesFromBackend();
-        // Manually refresh modal's local copy
+        // Refresh modal's separate copy
         this.labelService.getAllLabels().subscribe(resp => {
           const list = (resp as any)?.data || resp || [];
-          this.allLabels = (Array.isArray(list) ? list : []).map((l: any) => ({
+          this.editableLabels = (Array.isArray(list) ? list : []).map((l: any) => ({
             id: l.id ?? l.labelId,
             name: l.name || l.labelName || ''
           }));
@@ -634,8 +637,8 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
     this.editingLabelId = null;
 
-    // Optimistically remove from local list
-    this.allLabels = this.allLabels.filter(l => (l.id ?? (l as any).labelId) !== labelId);
+    // Optimistically remove from modal's local list
+    this.editableLabels = this.editableLabels.filter(l => (l.id ?? (l as any).labelId) !== labelId);
 
     this.labelService.deleteLabel(labelId).subscribe({
       next: () => {
