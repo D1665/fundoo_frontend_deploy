@@ -845,6 +845,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   }
 
   formatLocalISO(date: Date): string {
+    date.setSeconds(0, 0);
     return date.toISOString().slice(0, 19);
   }
 
