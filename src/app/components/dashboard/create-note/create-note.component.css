@@ -120,7 +120,7 @@
 .icons {
     display: flex;
     align-items: center;
-    gap: clamp(4px, 1.5vw, 12px);
+    gap: 16px;
 }
 
 .icons button:not(.reminder-option-btn):not(.picker-save-btn) {
