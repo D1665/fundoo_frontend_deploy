@@ -208,17 +208,15 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: 320px;
     margin-top: auto;
-    margin-left: -4px;
-    margin-bottom: -4px;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
 .card-actions.trash-actions {
-    justify-content: flex-start !important;
-    gap: clamp(16px, 14%, 90px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     width: 100% !important;
 }
 
