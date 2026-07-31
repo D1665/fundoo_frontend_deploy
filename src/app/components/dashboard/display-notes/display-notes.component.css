@@ -218,7 +218,7 @@
 
 .card-actions.trash-actions {
     justify-content: flex-start !important;
-    gap: 12px !important;
+    gap: clamp(20px, 6vw, 48px) !important;
 }
 
 .note-card:hover .card-actions {
