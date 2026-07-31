@@ -71,6 +71,25 @@
                 </div>
 
                 <div class="card-actions" (click)="$event.stopPropagation()">
+                    <!-- 1. Background options (Palette) -->
+                    <button mat-icon-button [matMenuTriggerFor]="pinnedColorMenu" title="Background options" type="button">
+                        <mat-icon>palette</mat-icon>
+                    </button>
+
+                    <mat-menu #pinnedColorMenu="matMenu" class="color-menu-panel">
+                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                            <button *ngFor="let c of colors" 
+                                    class="color-dot" 
+                                    [style.background-color]="c.color" 
+                                    [title]="c.name"
+                                    [class.active-color]="(note.color || '#ffffff') === c.color"
+                                    (click)="changeColor(note, c.color, $event)">
+                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
+                            </button>
+                        </div>
+                    </mat-menu>
+
+                    <!-- 2. Remind me -->
                     <div class="reminder-menu-container">
                         <button mat-icon-button title="Remind me" (click)="toggleReminderMenu(note, $event)" type="button">
                             <mat-icon>add_alert</mat-icon>
@@ -100,34 +119,36 @@
                         </div>
                     </div>
 
+                    <!-- 3. Collaborator -->
                     <button mat-icon-button title="Collaborator" (click)="openCollaboratorModal(note, $event)" type="button">
                         <mat-icon>person_add_alt</mat-icon>
                     </button>
 
-                    <button mat-icon-button [matMenuTriggerFor]="pinnedColorMenu" title="Background options" type="button">
-                        <mat-icon>palette</mat-icon>
-                    </button>
-
-                    <mat-menu #pinnedColorMenu="matMenu" class="color-menu-panel">
-                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
-                            <button *ngFor="let c of colors" 
-                                    class="color-dot" 
-                                    [style.background-color]="c.color" 
-                                    [title]="c.name"
-                                    [class.active-color]="(note.color || '#ffffff') === c.color"
-                                    (click)="changeColor(note, c.color, $event)">
-                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
-                            </button>
-                        </div>
-                    </mat-menu>
-
+                    <!-- 4. Add image -->
                     <button mat-icon-button title="Add image" (click)="openImageUploader(note, fileInput, $event)" type="button">
                         <mat-icon>image</mat-icon>
                     </button>
 
-                    <button mat-icon-button [matMenuTriggerFor]="pinnedLabelMenu" title="Add label" type="button">
-                        <mat-icon>label_outline</mat-icon>
+                    <!-- 5. Archive -->
+                    <button mat-icon-button title="Archive" (click)="toggleArchive(note, $event)" type="button">
+                        <mat-icon>archive</mat-icon>
                     </button>
+
+                    <!-- 6. More options -->
+                    <button mat-icon-button [matMenuTriggerFor]="pinnedMoreMenu" title="More" type="button">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #pinnedMoreMenu="matMenu" class="more-menu-panel">
+                        <button mat-menu-item [matMenuTriggerFor]="pinnedLabelMenu">
+                            <mat-icon>label_outline</mat-icon>
+                            <span>Add label</span>
+                        </button>
+                        <button mat-menu-item *ngIf="!isSharedNote(note)" (click)="trashNote(note, $event)">
+                            <mat-icon>delete_outline</mat-icon>
+                            <span>Delete note</span>
+                        </button>
+                    </mat-menu>
 
                     <mat-menu #pinnedLabelMenu="matMenu" class="label-menu-panel">
                         <div class="label-menu-header" (click)="$event.stopPropagation()">Label note</div>
@@ -136,14 +157,6 @@
                             <span>{{ label.name }}</span>
                         </div>
                     </mat-menu>
-
-                    <button mat-icon-button title="Archive" (click)="toggleArchive(note, $event)" type="button">
-                        <mat-icon>archive</mat-icon>
-                    </button>
-
-                    <button *ngIf="!isSharedNote(note)" mat-icon-button title="Delete note" (click)="trashNote(note, $event)" type="button">
-                        <mat-icon>delete_outline</mat-icon>
-                    </button>
                 </div>
 
             </div>
@@ -204,6 +217,25 @@
 
                 <!-- Actions for Notes & Archive View -->
                 <div class="card-actions" *ngIf="currentView !== 'trash'" (click)="$event.stopPropagation()">
+                    <!-- 1. Background options (Palette) -->
+                    <button mat-icon-button [matMenuTriggerFor]="otherCardColorMenu" title="Background options" type="button">
+                        <mat-icon>palette</mat-icon>
+                    </button>
+
+                    <mat-menu #otherCardColorMenu="matMenu" class="color-menu-panel">
+                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                            <button *ngFor="let c of colors" 
+                                    class="color-dot" 
+                                    [style.background-color]="c.color" 
+                                    [title]="c.name"
+                                    [class.active-color]="(note.color || '#ffffff') === c.color"
+                                    (click)="changeColor(note, c.color, $event)">
+                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
+                            </button>
+                        </div>
+                    </mat-menu>
+
+                    <!-- 2. Remind me -->
                     <div class="reminder-menu-container">
                         <button mat-icon-button title="Remind me" (click)="toggleReminderMenu(note, $event)" type="button">
                             <mat-icon>add_alert</mat-icon>
@@ -233,34 +265,36 @@
                         </div>
                     </div>
 
+                    <!-- 3. Collaborator -->
                     <button mat-icon-button title="Collaborator" (click)="openCollaboratorModal(note, $event)" type="button">
                         <mat-icon>person_add_alt</mat-icon>
                     </button>
 
-                    <button mat-icon-button [matMenuTriggerFor]="otherCardColorMenu" title="Background options" type="button">
-                        <mat-icon>palette</mat-icon>
-                    </button>
-
-                    <mat-menu #otherCardColorMenu="matMenu" class="color-menu-panel">
-                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
-                            <button *ngFor="let c of colors" 
-                                    class="color-dot" 
-                                    [style.background-color]="c.color" 
-                                    [title]="c.name"
-                                    [class.active-color]="(note.color || '#ffffff') === c.color"
-                                    (click)="changeColor(note, c.color, $event)">
-                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
-                            </button>
-                        </div>
-                    </mat-menu>
-
+                    <!-- 4. Add image -->
                     <button mat-icon-button title="Add image" (click)="openImageUploader(note, fileInput, $event)" type="button">
                         <mat-icon>image</mat-icon>
                     </button>
 
-                    <button mat-icon-button [matMenuTriggerFor]="otherLabelMenu" title="Add label" type="button">
-                        <mat-icon>label_outline</mat-icon>
+                    <!-- 5. Archive / Unarchive -->
+                    <button mat-icon-button [title]="currentView === 'archive' ? 'Unarchive' : 'Archive'" (click)="toggleArchive(note, $event)" type="button">
+                        <mat-icon>{{ currentView === 'archive' ? 'unarchive' : 'archive' }}</mat-icon>
                     </button>
+
+                    <!-- 6. More options -->
+                    <button mat-icon-button [matMenuTriggerFor]="otherMoreMenu" title="More" type="button">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+
+                    <mat-menu #otherMoreMenu="matMenu" class="more-menu-panel">
+                        <button mat-menu-item [matMenuTriggerFor]="otherLabelMenu">
+                            <mat-icon>label_outline</mat-icon>
+                            <span>Add label</span>
+                        </button>
+                        <button mat-menu-item *ngIf="!isSharedNote(note)" (click)="trashNote(note, $event)">
+                            <mat-icon>delete_outline</mat-icon>
+                            <span>Delete note</span>
+                        </button>
+                    </mat-menu>
 
                     <mat-menu #otherLabelMenu="matMenu" class="label-menu-panel">
                         <div class="label-menu-header" (click)="$event.stopPropagation()">Label note</div>
@@ -269,15 +303,6 @@
                             <span>{{ label.name }}</span>
                         </div>
                     </mat-menu>
-
-                    <!-- In Archive view, this button unarchives; in Notes view, it archives -->
-                    <button mat-icon-button [title]="currentView === 'archive' ? 'Unarchive' : 'Archive'" (click)="toggleArchive(note, $event)" type="button">
-                        <mat-icon>{{ currentView === 'archive' ? 'unarchive' : 'archive' }}</mat-icon>
-                    </button>
-
-                    <button *ngIf="!isSharedNote(note)" mat-icon-button title="Delete note" (click)="trashNote(note, $event)" type="button">
-                        <mat-icon>delete_outline</mat-icon>
-                    </button>
                 </div>
 
                 <!-- Actions for Trash View -->

@@ -120,9 +120,7 @@
 .icons {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    flex: 1;
-    margin-right: 16px;
+    gap: 0;
 }
 
 .icons button:not(.reminder-option-btn):not(.picker-save-btn) {
