@@ -216,6 +216,11 @@
     transition: opacity 0.2s ease;
 }
 
+.card-actions.trash-actions {
+    justify-content: flex-start !important;
+    gap: 12px !important;
+}
+
 .note-card:hover .card-actions {
     opacity: 1;
 }
