@@ -453,9 +453,9 @@
             <input type="text" 
                    class="label-input" 
                    [(ngModel)]="label.name" 
-                   (focus)="editingLabelId = label.id || null" 
+                   (focus)="editingLabelId = label.id || null; editingOriginalName = label.name" 
                    (keyup.enter)="saveLabelRename(label)" />
-            <button mat-icon-button class="label-action-btn" (click)="editingLabelId === label.id ? saveLabelRename(label) : (editingLabelId = label.id || null)" title="Edit or Save label">
+            <button mat-icon-button class="label-action-btn" (click)="editingLabelId === label.id ? saveLabelRename(label) : (editingLabelId = label.id || null); editingOriginalName = label.name" title="Edit or Save label">
                 <mat-icon>{{ editingLabelId === label.id ? 'check' : 'edit' }}</mat-icon>
             </button>
         </div>

@@ -543,8 +543,27 @@
 .label-action-btn {
     width: 32px !important;
     height: 32px !important;
+    min-width: 32px !important;
     line-height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     color: #5f6368;
+    flex-shrink: 0;
+}
+
+.label-icon-btn .mat-mdc-button-touch-target,
+.label-action-btn .mat-mdc-button-touch-target {
+    display: none !important;
+}
+
+.label-icon-btn mat-icon,
+.label-action-btn mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
 }
 
 .delete-btn:hover {

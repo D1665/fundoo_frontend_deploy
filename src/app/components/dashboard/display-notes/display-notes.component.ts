@@ -40,6 +40,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   allLabels: Label[] = [];
   newLabelName = '';
   editingLabelId: number | null = null;
+  editingOriginalName = '';
 
   // Image upload state
   targetImageNote: Note | null = null;
@@ -122,7 +123,9 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     });
 
     this.labelsSub = this.labelService.labels$.subscribe(labels => {
-      this.allLabels = labels;
+      if (!this.isEditLabelsModalOpen) {
+        this.allLabels = labels.map(l => ({ ...l }));
+      }
     });
 
     this.viewModeSub = this.noteService.isGridView$.subscribe((isGrid) => {
@@ -544,12 +547,24 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   openEditLabelsModal(): void {
     this.isEditLabelsModalOpen = true;
     this.newLabelName = '';
+    this.editingLabelId = null;
+    this.editingOriginalName = '';
     this.labelService.fetchLabels();
+    // Deep-copy labels so edits don't propagate live to the sidebar
+    setTimeout(() => {
+      this.allLabels = this.allLabels.map(l => ({ ...l }));
+    });
   }
 
   closeEditLabelsModal(): void {
+    // Auto-save any unsaved new label text
+    if (this.newLabelName.trim()) {
+      this.createNewLabel();
+    }
     this.isEditLabelsModalOpen = false;
     this.newLabelName = '';
+    this.editingLabelId = null;
+    this.editingOriginalName = '';
     this.labelService.fetchLabels();
     this.noteService.fetchNotesFromBackend();
   }
@@ -557,24 +572,44 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   createNewLabel(): void {
     if (!this.newLabelName.trim()) return;
     const name = this.newLabelName.trim();
+    this.newLabelName = '';
     this.labelService.createLabel(name).subscribe({
       next: () => {
-        this.newLabelName = '';
+        // Temporarily unlock guard to allow subscription to update allLabels
+        this.isEditLabelsModalOpen = false;
         this.labelService.fetchLabels();
+        setTimeout(() => {
+          this.isEditLabelsModalOpen = true;
+        });
       },
       error: (err) => console.error('Error creating label:', err)
     });
   }
 
   saveLabelRename(label: Label): void {
-    if (!label.id || !label.name.trim()) return;
-    this.editingLabelId = null;
-
+    if (!label.id || !label.name.trim()) {
+      // Revert to original name if empty
+      if (this.editingOriginalName) {
+        label.name = this.editingOriginalName;
+      }
+      this.editingLabelId = null;
+      this.editingOriginalName = '';
+      return;
+    }
     const newName = label.name.trim();
-    this.labelService.updateLabel(label.id, newName).subscribe({
+    const labelId = label.id;
+    this.editingLabelId = null;
+    this.editingOriginalName = '';
+
+    this.labelService.updateLabel(labelId, newName).subscribe({
       next: () => {
+        // Temporarily unlock guard to allow sidebar to update
+        this.isEditLabelsModalOpen = false;
         this.labelService.fetchLabels();
         this.noteService.fetchNotesFromBackend();
+        setTimeout(() => {
+          this.isEditLabelsModalOpen = true;
+        });
       },
       error: (err) => {
         console.error('Error renaming label:', err);
