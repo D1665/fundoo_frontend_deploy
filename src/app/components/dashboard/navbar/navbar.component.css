@@ -104,14 +104,16 @@
 
 /* RIGHT */
 
+.navbar button mat-icon,
+.navbar-left button mat-icon,
+.navbar-right button mat-icon {
+    color: #5f6368 !important;
+}
+
 .navbar-right{
-
     display:flex;
-
     align-items:center;
-
     gap:10px;
-
 }
 
 .avatar{

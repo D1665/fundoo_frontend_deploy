@@ -206,11 +206,9 @@
 .card-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 2px;
+    justify-content: space-between;
+    width: 100%;
     margin-top: auto;
-    margin-left: -6px;
-    margin-right: -6px;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
@@ -413,10 +411,38 @@
 
 .remove-collab-btn,
 .add-collab-btn {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     color: #5f6368;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.remove-collab-btn .mat-mdc-button-touch-target,
+.add-collab-btn .mat-mdc-button-touch-target {
+    display: none !important;
+}
+
+.remove-collab-btn mat-icon,
+.add-collab-btn mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+}
+
+.remove-collab-btn:hover,
+.add-collab-btn:hover {
+    background-color: rgba(60, 64, 67, 0.12) !important;
 }
 
 .collab-footer {

@@ -33,7 +33,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px;
+    padding: 4px 8px 4px 16px;
+    height: 46px;
+    box-sizing: border-box;
     cursor: text;
     animation: collapseNote 0.15s cubic-bezier(0, 0, 0.2, 1) forwards;
 }
@@ -42,6 +44,11 @@
     display: flex;
     align-items: center;
     gap: 2px;
+}
+
+.collapsed-icons button mat-icon,
+.collapsed-icons mat-icon {
+    color: #5f6368 !important;
 }
 
 .collapsed input {
@@ -89,11 +96,11 @@
     border: none;
     outline: none;
     resize: none;
-    padding: 8px 16px 12px 16px;
+    padding: 4px 16px 8px 16px;
     font-size: 14px;
     color: #202124;
     font-family: inherit;
-    min-height: 90px;
+    min-height: 40px;
     background: transparent;
     box-sizing: border-box;
     overflow-y: hidden;
@@ -113,7 +120,9 @@
 .icons {
     display: flex;
     align-items: center;
-    gap: 2px;
+    justify-content: space-between;
+    flex: 1;
+    margin-right: 16px;
 }
 
 .icons button:not(.reminder-option-btn):not(.picker-save-btn) {
@@ -439,10 +448,38 @@
 
 .remove-collab-btn,
 .add-collab-btn {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     color: #5f6368;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.remove-collab-btn .mat-mdc-button-touch-target,
+.add-collab-btn .mat-mdc-button-touch-target {
+    display: none !important;
+}
+
+.remove-collab-btn mat-icon,
+.add-collab-btn mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+}
+
+.remove-collab-btn:hover,
+.add-collab-btn:hover {
+    background-color: rgba(60, 64, 67, 0.12) !important;
 }
 
 .collab-footer {
