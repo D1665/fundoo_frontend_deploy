@@ -207,7 +207,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    gap: 0;
+    gap: clamp(4px, 1.5vw, 10px);
     margin-top: auto;
     margin-left: -4px;
     margin-bottom: -4px;
