@@ -38,6 +38,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.noteService.setSearchQuery(query);
   }
 
+  onLogoClick(): void {
+    this.searchQuery = '';
+    this.noteService.setSearchQuery('');
+    this.noteService.setView('notes');
+  }
+
   onRefresh(): void {
     if (this.isRefreshing) return;
     this.isRefreshing = true;

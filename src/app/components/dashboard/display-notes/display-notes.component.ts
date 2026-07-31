@@ -153,7 +153,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   }
 
   fetchNotes(): void {
-    this.noteService.fetchNotesFromBackend();
+    this.noteService.fetchNotesFromBackend(true);
   }
 
   isSharedNote(note: Note): boolean {

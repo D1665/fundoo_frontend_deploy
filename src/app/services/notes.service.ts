@@ -40,11 +40,8 @@ export class NoteService {
   constructor(private http: HttpClient) {}
 
   setView(view: string): void {
-    if (this.currentViewSubject.value === view) {
-      return;
-    }
     this.currentViewSubject.next(view);
-    this.fetchNotesFromBackend();
+    this.fetchNotesFromBackend(true);
   }
 
   getCurrentView(): string {
@@ -277,7 +274,7 @@ export class NoteService {
    * Smart Fetcher based on Active View (Notes, Archive, Trash)
    * Automatically combines user's own notes AND notes shared with user via Collaborator
    */
-  fetchNotesFromBackend(showLoader: boolean = false): void {
+  fetchNotesFromBackend(showLoader: boolean = true): void {
     if (this.isFetching) {
       console.log('[NoteService] Fetch already in progress, skipping duplicate call.');
       return;
