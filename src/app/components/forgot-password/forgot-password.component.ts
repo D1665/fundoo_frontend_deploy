@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { SnackbarService } from '../../services/snackbar.service';
@@ -8,7 +8,7 @@ import { SnackbarService } from '../../services/snackbar.service';
   templateUrl: './forgot-password.component.html',
   styleUrls: ['./forgot-password.component.css']
 })
-export class ForgotPasswordComponent {
+export class ForgotPasswordComponent implements OnInit {
   email: string = '';
   errorMessage: string = '';
   successMessage: string = '';
@@ -21,6 +21,10 @@ export class ForgotPasswordComponent {
     private userService: UserService,
     private snackbar: SnackbarService
   ) {}
+
+  ngOnInit(): void {
+    this.userService.pingBackend();
+  }
 
   validateEmail(): boolean {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

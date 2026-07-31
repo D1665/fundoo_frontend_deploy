@@ -27,6 +27,7 @@ export class ResetPasswordComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.userService.pingBackend();
     this.route.queryParams.subscribe(params => {
       this.token = params['token'] || '';
       if (!this.token) {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -9,7 +9,7 @@ import { SnackbarService } from '../../services/snackbar.service';
   templateUrl: './sign-in.component.html',
   styleUrls: ['./sign-in.component.css']
 })
-export class SignInComponent {
+export class SignInComponent implements OnInit {
   email: string = '';
   password: string = '';
   errorMessage: string = '';
@@ -25,6 +25,10 @@ export class SignInComponent {
     private userService: UserService,
     private snackbar: SnackbarService
   ) {}
+
+  ngOnInit(): void {
+    this.userService.pingBackend();
+  }
 
   validateEmail(): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
