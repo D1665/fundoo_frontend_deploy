@@ -550,16 +550,18 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.editingLabelId = null;
     this.editingOriginalName = '';
     this.labelService.fetchLabels();
-    // Deep-copy labels so edits don't propagate live to the sidebar
-    setTimeout(() => {
-      this.allLabels = this.allLabels.map(l => ({ ...l }));
-    });
   }
 
   closeEditLabelsModal(): void {
-    // Auto-save any unsaved new label text
+    // Auto-save any unsaved new label text (inline, don't call createNewLabel)
     if (this.newLabelName.trim()) {
-      this.createNewLabel();
+      const name = this.newLabelName.trim();
+      this.labelService.createLabel(name).subscribe({
+        next: () => {
+          this.labelService.fetchLabels();
+        },
+        error: (err) => console.error('Error creating label:', err)
+      });
     }
     this.isEditLabelsModalOpen = false;
     this.newLabelName = '';
@@ -575,11 +577,15 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
     this.newLabelName = '';
     this.labelService.createLabel(name).subscribe({
       next: () => {
-        // Temporarily unlock guard to allow subscription to update allLabels
-        this.isEditLabelsModalOpen = false;
+        // Refresh sidebar
         this.labelService.fetchLabels();
-        setTimeout(() => {
-          this.isEditLabelsModalOpen = true;
+        // Manually refresh modal's local copy
+        this.labelService.getAllLabels().subscribe(resp => {
+          const list = (resp as any)?.data || resp || [];
+          this.allLabels = (Array.isArray(list) ? list : []).map((l: any) => ({
+            id: l.id ?? l.labelId,
+            name: l.name || l.labelName || ''
+          }));
         });
       },
       error: (err) => console.error('Error creating label:', err)
@@ -603,12 +609,16 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
     this.labelService.updateLabel(labelId, newName).subscribe({
       next: () => {
-        // Temporarily unlock guard to allow sidebar to update
-        this.isEditLabelsModalOpen = false;
+        // Refresh sidebar
         this.labelService.fetchLabels();
         this.noteService.fetchNotesFromBackend();
-        setTimeout(() => {
-          this.isEditLabelsModalOpen = true;
+        // Manually refresh modal's local copy
+        this.labelService.getAllLabels().subscribe(resp => {
+          const list = (resp as any)?.data || resp || [];
+          this.allLabels = (Array.isArray(list) ? list : []).map((l: any) => ({
+            id: l.id ?? l.labelId,
+            name: l.name || l.labelName || ''
+          }));
         });
       },
       error: (err) => {

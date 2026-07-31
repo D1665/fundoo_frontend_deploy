@@ -436,8 +436,8 @@
 
         <!-- Create New Label Row -->
         <div class="label-row input-row">
-            <button mat-icon-button class="label-icon-btn" (click)="createNewLabel()">
-                <mat-icon>{{ newLabelName.trim() ? 'check' : 'add' }}</mat-icon>
+            <button mat-icon-button class="label-icon-btn" (click)="newLabelName.trim() ? newLabelName = '' : null">
+                <mat-icon>{{ newLabelName.trim() ? 'close' : 'add' }}</mat-icon>
             </button>
             <input type="text" class="label-input" placeholder="Create new label" [(ngModel)]="newLabelName" (keyup.enter)="createNewLabel()" />
             <button mat-icon-button class="label-action-btn" (click)="createNewLabel()" *ngIf="newLabelName.trim()">
