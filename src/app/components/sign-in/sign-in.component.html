@@ -55,6 +55,11 @@
           </span>
         </button>
       </div>
+
+      <div class="cold-start-notice" *ngIf="isLoading">
+        <span class="notice-icon">⏱️</span>
+        Starting server, this may take 1-2 minutes...
+      </div>
     </form>
   </div>
 </div>

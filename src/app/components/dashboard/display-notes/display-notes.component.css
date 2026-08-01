@@ -748,7 +748,15 @@
     font-size: 14px;
     color: #5f6368;
     font-weight: 500;
+}
+
+.cold-start-subtext {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #80868b;
+    font-weight: 400;
     letter-spacing: 0.2px;
+    animation: fadeInNotice 0.3s ease-in-out;
 }
 
 @keyframes spin {
