@@ -214,10 +214,8 @@
 }
 
 .card-actions.trash-actions {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
+    justify-content: flex-start !important;
+    gap: 8% !important;
 }
 
 .note-card:hover .card-actions {
