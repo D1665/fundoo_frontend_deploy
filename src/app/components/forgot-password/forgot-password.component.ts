@@ -15,6 +15,8 @@ export class ForgotPasswordComponent implements OnInit {
 
   emailError: string = '';
   isLoading: boolean = false;
+  showColdStartNotice: boolean = false;
+  private coldStartTimer: any = null;
 
   constructor(
     private router: Router,
@@ -47,14 +49,25 @@ export class ForgotPasswordComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.isLoading = true;
+    this.showColdStartNotice = false;
+    if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+    this.coldStartTimer = setTimeout(() => {
+      if (this.isLoading) {
+        this.showColdStartNotice = true;
+      }
+    }, 3500);
 
     this.userService.forgotPassword(this.email).subscribe({
       next: (res: any) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.isLoading = false;
         this.successMessage = res.message || 'A password reset link has been sent to your email.';
         this.snackbar.success('Reset Link Sent');
       },
       error: (err: any) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.isLoading = false;
         console.error(err);
         this.errorMessage = err.error?.message || 'Failed to request password reset link. Please check the email and try again.';

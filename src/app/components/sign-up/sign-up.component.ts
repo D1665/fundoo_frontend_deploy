@@ -25,6 +25,8 @@ export class SignUpComponent implements OnInit {
   confirmPasswordError: string = '';
 
   isLoading: boolean = false;
+  showColdStartNotice: boolean = false;
+  private coldStartTimer: any = null;
 
   constructor(
     private router: Router,
@@ -154,6 +156,13 @@ export class SignUpComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.isLoading = true;
+    this.showColdStartNotice = false;
+    if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+    this.coldStartTimer = setTimeout(() => {
+      if (this.isLoading) {
+        this.showColdStartNotice = true;
+      }
+    }, 3500);
  
     const payload = {
       firstName: this.firstName,
@@ -164,6 +173,8 @@ export class SignUpComponent implements OnInit {
  
     this.userService.register(payload).subscribe({
       next: (res: string) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.successMessage = res || 'Registration successful! Redirecting to sign in...';
         this.snackbar.success('Registration Successful');
         setTimeout(() => {
@@ -172,6 +183,8 @@ export class SignUpComponent implements OnInit {
         }, 2000);
       },
       error: (err: any) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.isLoading = false;
         console.error(err);
         let errorMsg = 'Registration failed.';

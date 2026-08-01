@@ -18,6 +18,8 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   currentView = 'notes';
   searchQuery = '';
   loading = false;
+  showColdStartNotice = false;
+  private coldStartTimer: any = null;
 
   // Edit Note Modal state
   isEditModalOpen = false;
@@ -107,6 +109,18 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
     this.loadingSub = this.noteService.loading$.subscribe((isLoading) => {
       this.loading = isLoading;
+      if (isLoading) {
+        this.showColdStartNotice = false;
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.coldStartTimer = setTimeout(() => {
+          if (this.loading) {
+            this.showColdStartNotice = true;
+          }
+        }, 3500);
+      } else {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
+      }
     });
 
     this.viewSub = this.noteService.currentView$.subscribe((view) => {
@@ -139,6 +153,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
     if (this.notesSub) this.notesSub.unsubscribe();
     if (this.viewSub) this.viewSub.unsubscribe();
     if (this.searchSub) this.searchSub.unsubscribe();

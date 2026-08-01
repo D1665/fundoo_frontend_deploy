@@ -18,6 +18,8 @@ export class ResetPasswordComponent implements OnInit {
   confirmPasswordError = '';
 
   isLoading: boolean = false;
+  showColdStartNotice: boolean = false;
+  private coldStartTimer: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -80,9 +82,18 @@ export class ResetPasswordComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.isLoading = true;
+    this.showColdStartNotice = false;
+    if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+    this.coldStartTimer = setTimeout(() => {
+      if (this.isLoading) {
+        this.showColdStartNotice = true;
+      }
+    }, 3500);
 
     this.userService.resetPassword(this.token, this.newPassword).subscribe({
       next: (res) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.snackbar.success('Password Reset Successfully');
         this.successMessage = 'Password reset successful! Redirecting to login...';
         setTimeout(() => {
@@ -91,6 +102,8 @@ export class ResetPasswordComponent implements OnInit {
         }, 3000);
       },
       error: (err) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.isLoading = false;
         console.error(err);
         this.snackbar.error('Password Reset Failed');

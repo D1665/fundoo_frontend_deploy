@@ -117,7 +117,7 @@
           </button>
         </div>
 
-        <div class="cold-start-notice" *ngIf="isLoading">
+        <div class="cold-start-notice" *ngIf="isLoading && showColdStartNotice">
           <span class="notice-icon">⏱️</span>
           Starting server, this may take 1-2 minutes...
         </div>

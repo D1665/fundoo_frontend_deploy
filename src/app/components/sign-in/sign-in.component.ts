@@ -19,6 +19,8 @@ export class SignInComponent implements OnInit {
   passwordError: string = '';
 
   isLoading: boolean = false;
+  showColdStartNotice: boolean = false;
+  private coldStartTimer: any = null;
 
   constructor(
     private router: Router,
@@ -73,6 +75,13 @@ export class SignInComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
     this.isLoading = true;
+    this.showColdStartNotice = false;
+    if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+    this.coldStartTimer = setTimeout(() => {
+      if (this.isLoading) {
+        this.showColdStartNotice = true;
+      }
+    }, 3500);
   
     const payload = {
       email: this.email,
@@ -82,6 +91,8 @@ export class SignInComponent implements OnInit {
     this.userService.login(payload).subscribe({
   
       next: (response: any) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         let token = '';
         if (typeof response.data === 'string') {
           token = response.data;
@@ -106,6 +117,8 @@ export class SignInComponent implements OnInit {
       },
   
       error: (error) => {
+        if (this.coldStartTimer) clearTimeout(this.coldStartTimer);
+        this.showColdStartNotice = false;
         this.isLoading = false;
         console.error(error);
         if (error.status === 0) {
