@@ -149,6 +149,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   addAccount(): void {
     this.isProfileMenuOpen = false;
+    localStorage.removeItem('token');
+    localStorage.removeItem('email');
     this.router.navigate(['/signup']);
   }
 
