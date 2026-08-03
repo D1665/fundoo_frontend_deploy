@@ -159,16 +159,16 @@
 
         <div class="collapsed-icons">
 
-            <button mat-icon-button type="button">
-                <mat-icon>check_box</mat-icon>
+            <button mat-icon-button type="button" title="New list" (click)="$event.stopPropagation(); openNote()">
+                <mat-icon class="icon-outlined">check_box</mat-icon>
             </button>
         
-            <button mat-icon-button type="button">
-                <mat-icon>brush</mat-icon>
+            <button mat-icon-button type="button" title="New note with drawing" (click)="$event.stopPropagation(); openNote()">
+                <mat-icon class="icon-outlined">brush</mat-icon>
             </button>
         
-            <button mat-icon-button type="button" (click)="$event.stopPropagation(); fileInput.click()">
-                <mat-icon>image</mat-icon>
+            <button mat-icon-button type="button" (click)="$event.stopPropagation(); fileInput.click()" title="New note with image">
+                <mat-icon class="icon-outlined">image</mat-icon>
             </button>
         
         </div>
