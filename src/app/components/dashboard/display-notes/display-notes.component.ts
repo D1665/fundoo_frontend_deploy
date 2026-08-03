@@ -255,7 +255,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       next: () => {},
       error: () => {
         this.snackbar.error('Failed to pin note');
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
@@ -285,7 +285,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       next: () => {},
       error: () => {
         this.snackbar.error('Failed to archive note');
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
@@ -300,7 +300,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       next: () => {},
       error: () => {
         this.snackbar.error('Failed to trash note');
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
@@ -315,7 +315,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       next: () => {},
       error: () => {
         this.snackbar.error('Failed to restore note');
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
@@ -333,7 +333,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       error: (e) => {
         console.error('Error deleting note permanently:', e);
         this.snackbar.error('Failed to delete note');
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
@@ -349,7 +349,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       next: () => {},
       error: () => {
         this.snackbar.error('Failed to change color');
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
@@ -429,7 +429,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
             console.error('Error setting reminder:', err);
             const errMsg = err.error?.message || 'Reminder time must be in the future';
             this.snackbar.error(errMsg);
-            this.noteService.fetchNotesFromBackend();
+            this.noteService.fetchNotesFromBackend(false);
           }
         });
       } else {
@@ -443,7 +443,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
           },
           error: (err) => {
             console.error('Error deleting reminder:', err);
-            this.noteService.fetchNotesFromBackend();
+            this.noteService.fetchNotesFromBackend(false);
           }
         });
       }

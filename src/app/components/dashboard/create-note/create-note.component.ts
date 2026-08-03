@@ -132,7 +132,7 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
     this.resetForm();
 
     const finishSave = () => {
-      this.noteService.fetchNotesFromBackend();
+      this.noteService.fetchNotesFromBackend(false);
     };
 
     this.noteService.createNote(newNoteData).subscribe({
@@ -167,7 +167,7 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
           if (currentView.startsWith('label_')) {
             const labelId = parseInt(currentView.replace('label_', ''), 10);
             this.labelService.addLabelToNote(labelId, createdId).subscribe({
-              next: () => this.noteService.fetchNotesFromBackend()
+              next: () => this.noteService.fetchNotesFromBackend(false)
             });
           }
 
@@ -218,7 +218,7 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
         } else {
           alert(`HTTP Error ${err.status || 0}: ${err.error?.message || err.message || 'Cannot connect to backend'}. Please verify backend service status.`);
         }
-        this.noteService.fetchNotesFromBackend();
+        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
