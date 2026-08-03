@@ -28,6 +28,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { NgxMasonryModule } from 'ngx-masonry';
 
 
   @NgModule({
@@ -61,7 +62,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
       MatSidenavModule,
       MatListModule,
       MatCardModule,
-      MatSnackBarModule
+      MatSnackBarModule,
+      NgxMasonryModule
     ],
     providers: [
     provideAnimationsAsync()

@@ -50,10 +50,9 @@
     text-transform: uppercase;
 }
 
-/* Notes Grid - Masonry Layout */
+/* Notes Grid - Masonry Layout (powered by ngx-masonry) */
 .notes-grid {
-    column-count: 4;
-    column-gap: 16px;
+    margin: 0 auto;
     width: 100%;
 }
 
@@ -66,13 +65,15 @@
     cursor: pointer;
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
     word-break: break-word;
-    display: inline-flex;
+    display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 100%;
-    margin-bottom: 16px;
-    break-inside: avoid;
+    min-height: 110px;
     animation: cardFadeIn 0.22s cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.note-card.masonry-item {
+    width: 240px;
 }
 
 .note-card.active-menu-card {
@@ -677,7 +678,6 @@
 
 /* List View layout */
 .notes-grid.list-view {
-    column-count: unset;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -686,31 +686,22 @@
 }
 
 .notes-grid.list-view .note-card {
-    display: flex;
     width: 100%;
     max-width: 600px;
     height: auto;
     min-height: auto;
-    margin-bottom: 0;
-    break-inside: auto;
 }
 
 /* Modals & Layout Responsiveness */
-@media (max-width: 1200px) {
-    .notes-grid {
-        column-count: 3;
-    }
-}
-
 @media (max-width: 900px) {
-    .notes-grid {
-        column-count: 2;
+    .note-card.masonry-item {
+        width: 200px;
     }
 }
 
 @media (max-width: 480px) {
-    .notes-grid {
-        column-count: 1;
+    .note-card.masonry-item {
+        width: calc(100vw - 64px);
     }
     .modal-card {
         width: 95% !important;

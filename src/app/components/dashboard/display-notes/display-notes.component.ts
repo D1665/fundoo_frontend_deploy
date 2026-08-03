@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { NgxMasonryComponent, NgxMasonryOptions } from 'ngx-masonry';
 import { NoteService } from '../../../services/notes.service';
 import { LabelService } from '../../../services/label.service';
 import { Note } from '../../../models/notes';
@@ -12,6 +13,14 @@ import { SnackbarService } from '../../../services/snackbar.service';
   styleUrls: ['./display-notes.component.css']
 })
 export class DisplayNotesComponent implements OnInit, OnDestroy {
+  @ViewChild(NgxMasonryComponent) masonry!: NgxMasonryComponent;
+
+  masonryOptions: NgxMasonryOptions = {
+    gutter: 16,
+    fitWidth: true,
+    horizontalOrder: true
+  };
+
   notes: Note[] = [];
   pinnedNotes: Note[] = [];
   otherNotes: Note[] = [];

@@ -26,9 +26,9 @@
     <!-- Pinned Notes Section (Notes View only) -->
     <div class="notes-section" *ngIf="!loading && currentView === 'notes' && pinnedNotes.length > 0">
         <h3 class="section-title">PINNED</h3>
-        <div class="notes-grid" [class.list-view]="!isGridView">
-            <div *ngFor="let note of pinnedNotes; trackBy: trackByNoteId" 
-                 class="note-card" 
+        <ngx-masonry [options]="masonryOptions" *ngIf="isGridView" class="notes-grid">
+            <div ngxMasonryItem *ngFor="let note of pinnedNotes; trackBy: trackByNoteId" 
+                 class="note-card masonry-item" 
                  [class.active-menu-card]="activeReminderNoteId === note.id"
                  [style.background-color]="note.color || '#ffffff'"
                  (click)="openEditModal(note)">
@@ -160,6 +160,74 @@
                 </div>
 
             </div>
+        </ngx-masonry>
+
+        <div class="notes-grid list-view" *ngIf="!isGridView">
+            <div *ngFor="let note of pinnedNotes; trackBy: trackByNoteId" 
+                 class="note-card" 
+                 [class.active-menu-card]="activeReminderNoteId === note.id"
+                 [style.background-color]="note.color || '#ffffff'"
+                 (click)="openEditModal(note)">
+
+                <div class="card-image-wrapper" *ngIf="getNoteImage(note)">
+                    <img [src]="getNoteImage(note)" class="card-image" alt="Note Image" />
+                    <button mat-icon-button class="remove-img-btn" (click)="removeNoteImage(note, $event)" title="Remove image">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-header">
+                    <div class="title-with-badge">
+                        <h4 class="card-title" [innerHTML]="note.title | highlight:searchQuery"></h4>
+                        <span *ngIf="isSharedNote(note)" class="shared-badge" [title]="'Shared by ' + (note.ownerEmail || 'another user')">Shared</span>
+                    </div>
+                    <button mat-icon-button class="pin-btn pinned" (click)="togglePin(note, $event)" title="Unpin note">
+                        <mat-icon>push_pin</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-content" [innerHTML]="(note.content || note.description) | highlight:searchQuery">
+                </div>
+
+                <div class="card-footer-chips" *ngIf="(getNoteLabels(note).length > 0) || note.reminder || getNoteCollaborators(note).length > 0" (click)="$event.stopPropagation()">
+                    <span class="reminder-chip" *ngIf="note.reminder">
+                        <mat-icon class="reminder-chip-icon">access_time</mat-icon>
+                        <span class="reminder-chip-text">{{ formatReminder(note.reminder) }}</span>
+                        <mat-icon class="chip-remove" (click)="removeReminderFromNote(note, $event)">close</mat-icon>
+                    </span>
+                    <span class="label-chip" *ngFor="let label of getNoteLabels(note)">
+                        {{ label.name }}
+                        <mat-icon class="chip-remove" (click)="removeLabelFromNoteCard(note, label, $event)">close</mat-icon>
+                    </span>
+                    <div class="collab-avatar-circle" *ngFor="let collab of getNoteCollaborators(note)" [title]="collab">
+                        {{ collab[0] | uppercase }}
+                    </div>
+                </div>
+
+                <div class="card-actions" (click)="$event.stopPropagation()">
+                    <button mat-icon-button [matMenuTriggerFor]="pinnedListColorMenu" title="Background options" type="button">
+                        <mat-icon>palette</mat-icon>
+                    </button>
+
+                    <mat-menu #pinnedListColorMenu="matMenu" class="color-menu-panel">
+                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                            <button *ngFor="let c of colors" 
+                                    class="color-dot" 
+                                    [style.background-color]="c.color" 
+                                    [title]="c.name"
+                                    [class.active-color]="(note.color || '#ffffff') === c.color"
+                                    (click)="changeColor(note, c.color, $event)">
+                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
+                            </button>
+                        </div>
+                    </mat-menu>
+
+                    <button mat-icon-button title="Archive" (click)="toggleArchive(note, $event)" type="button">
+                        <mat-icon>archive</mat-icon>
+                    </button>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -169,9 +237,9 @@
         <h3 class="section-title" *ngIf="currentView === 'archive'">ARCHIVE</h3>
         <h3 class="section-title" *ngIf="currentView === 'trash'">TRASH</h3>
 
-        <div class="notes-grid" [class.list-view]="!isGridView">
-            <div *ngFor="let note of otherNotes; trackBy: trackByNoteId" 
-                 class="note-card" 
+        <ngx-masonry [options]="masonryOptions" *ngIf="isGridView" class="notes-grid">
+            <div ngxMasonryItem *ngFor="let note of otherNotes; trackBy: trackByNoteId" 
+                 class="note-card masonry-item" 
                  [class.trash-card]="currentView === 'trash'"
                  [class.active-menu-card]="activeReminderNoteId === note.id"
                  [style.background-color]="note.color || '#ffffff'"
@@ -310,6 +378,84 @@
                         <mat-icon>delete_forever</mat-icon>
                     </button>
 
+                    <button mat-icon-button title="Restore" (click)="restoreNote(note, $event)" type="button">
+                        <mat-icon>restore_from_trash</mat-icon>
+                    </button>
+                </div>
+
+            </div>
+        </ngx-masonry>
+
+        <div class="notes-grid list-view" *ngIf="!isGridView">
+            <div *ngFor="let note of otherNotes; trackBy: trackByNoteId" 
+                 class="note-card" 
+                 [class.trash-card]="currentView === 'trash'"
+                 [class.active-menu-card]="activeReminderNoteId === note.id"
+                 [style.background-color]="note.color || '#ffffff'"
+                 (click)="openEditModal(note)">
+
+                <div class="card-image-wrapper" *ngIf="getNoteImage(note)">
+                    <img [src]="getNoteImage(note)" class="card-image" alt="Note Image" />
+                    <button mat-icon-button class="remove-img-btn" (click)="removeNoteImage(note, $event)" title="Remove image">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-header">
+                    <div class="title-with-badge">
+                        <h4 class="card-title" [innerHTML]="note.title | highlight:searchQuery"></h4>
+                        <span *ngIf="isSharedNote(note)" class="shared-badge" [title]="'Shared by ' + (note.ownerEmail || 'another user')">Shared</span>
+                    </div>
+                    <button *ngIf="currentView === 'notes'" mat-icon-button class="pin-btn" (click)="togglePin(note, $event)" title="Pin note">
+                        <mat-icon>push_pin_outlined</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-content" [innerHTML]="(note.content || note.description) | highlight:searchQuery">
+                </div>
+
+                <div class="card-footer-chips" *ngIf="(getNoteLabels(note).length > 0) || note.reminder || getNoteCollaborators(note).length > 0" (click)="$event.stopPropagation()">
+                    <span class="reminder-chip" *ngIf="note.reminder">
+                        <mat-icon class="reminder-chip-icon">access_time</mat-icon>
+                        <span class="reminder-chip-text">{{ formatReminder(note.reminder) }}</span>
+                        <mat-icon class="chip-remove" (click)="removeReminderFromNote(note, $event)">close</mat-icon>
+                    </span>
+                    <span class="label-chip" *ngFor="let label of getNoteLabels(note)">
+                        {{ label.name }}
+                        <mat-icon class="chip-remove" (click)="removeLabelFromNoteCard(note, label, $event)">close</mat-icon>
+                    </span>
+                    <div class="collab-avatar-circle" *ngFor="let collab of getNoteCollaborators(note)" [title]="collab">
+                        {{ collab[0] | uppercase }}
+                    </div>
+                </div>
+
+                <div class="card-actions" *ngIf="currentView !== 'trash'" (click)="$event.stopPropagation()">
+                    <button mat-icon-button [matMenuTriggerFor]="otherListColorMenu" title="Background options" type="button">
+                        <mat-icon>palette</mat-icon>
+                    </button>
+
+                    <mat-menu #otherListColorMenu="matMenu" class="color-menu-panel">
+                        <div class="color-palette-grid" (click)="$event.stopPropagation()">
+                            <button *ngFor="let c of colors" 
+                                    class="color-dot" 
+                                    [style.background-color]="c.color" 
+                                    [title]="c.name"
+                                    [class.active-color]="(note.color || '#ffffff') === c.color"
+                                    (click)="changeColor(note, c.color, $event)">
+                                <mat-icon *ngIf="(note.color || '#ffffff') === c.color" class="check-icon">check</mat-icon>
+                            </button>
+                        </div>
+                    </mat-menu>
+
+                    <button mat-icon-button [title]="currentView === 'archive' ? 'Unarchive' : 'Archive'" (click)="toggleArchive(note, $event)" type="button">
+                        <mat-icon>{{ currentView === 'archive' ? 'unarchive' : 'archive' }}</mat-icon>
+                    </button>
+                </div>
+
+                <div class="card-actions trash-actions" *ngIf="currentView === 'trash'" (click)="$event.stopPropagation()">
+                    <button mat-icon-button title="Delete forever" (click)="deletePermanently(note, $event)" type="button">
+                        <mat-icon>delete_forever</mat-icon>
+                    </button>
                     <button mat-icon-button title="Restore" (click)="restoreNote(note, $event)" type="button">
                         <mat-icon>restore_from_trash</mat-icon>
                     </button>
