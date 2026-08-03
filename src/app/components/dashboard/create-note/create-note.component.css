@@ -43,12 +43,37 @@
 .collapsed-icons {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
+}
+
+.collapsed-icons button {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #5f6368 !important;
+    border-radius: 50%;
+}
+
+.collapsed-icons button .mat-mdc-button-touch-target {
+    display: none !important;
 }
 
 .collapsed-icons button mat-icon,
 .collapsed-icons mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
     color: #5f6368 !important;
+    opacity: 0.85;
+}
+
+.collapsed-icons button:hover {
+    background: rgba(95, 99, 104, 0.08);
 }
 
 .collapsed input {
@@ -676,4 +701,33 @@
 
 .picker-save-btn:hover {
     background-color: #1557b0;
+}
+
+/* Label Menu Panel */
+.label-menu-header {
+    font-size: 12px;
+    font-weight: 500;
+    color: #5f6368;
+    padding: 8px 16px;
+}
+
+.label-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #202124;
+}
+
+.label-menu-item:hover {
+    background: rgba(95, 99, 104, 0.08);
+}
+
+.check-box-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    color: #5f6368;
 }

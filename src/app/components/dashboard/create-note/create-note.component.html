@@ -116,11 +116,13 @@
                     <mat-icon>more_vert</mat-icon>
                 </button>
 
-                <mat-menu #moreMenu="matMenu" class="label-menu-panel">
+                <mat-menu #moreMenu="matMenu" class="more-menu-panel">
                     <button mat-menu-item [matMenuTriggerFor]="creatorLabelMenu">
+                        <mat-icon>label_outline</mat-icon>
                         <span>Add label</span>
                     </button>
                     <button mat-menu-item (click)="discardNote()">
+                        <mat-icon>delete_outline</mat-icon>
                         <span>Delete note</span>
                     </button>
                 </mat-menu>
