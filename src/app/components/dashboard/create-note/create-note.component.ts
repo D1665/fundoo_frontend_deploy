@@ -131,10 +131,6 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
 
     this.resetForm();
 
-    const finishSave = () => {
-      this.noteService.fetchNotesFromBackend(false);
-    };
-
     this.noteService.createNote(newNoteData).subscribe({
       next: (response: any) => {
         let createdNote: any = null;
@@ -144,10 +140,15 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
         const createdId = createdNote ? (createdNote.id || createdNote.noteId) : null;
 
         if (createdId) {
-          this.noteService.removeLocalNote(tempId);
-          this.noteService.addCreatedNoteToSubject(createdNote);
+          const updatedLocalNote: Note = {
+            ...optimisticNote,
+            ...(createdNote || {}),
+            id: createdId
+          };
 
-          // Cache the image in localStorage under the correct note ID
+          this.noteService.removeLocalNote(tempId);
+          this.noteService.addCreatedNoteToSubject(updatedLocalNote);
+
           if (savedImage) {
             try {
               localStorage.setItem('note_image_' + createdId, savedImage);
@@ -166,12 +167,9 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
           const currentView = this.noteService.getCurrentView();
           if (currentView.startsWith('label_')) {
             const labelId = parseInt(currentView.replace('label_', ''), 10);
-            this.labelService.addLabelToNote(labelId, createdId).subscribe({
-              next: () => this.noteService.fetchNotesFromBackend(false)
-            });
+            this.labelService.addLabelToNote(labelId, createdId).subscribe();
           }
 
-          // Link post-creation tasks (reminder, collaborators, and labels)
           let tasks: Observable<any>[] = [];
           if (savedReminder) {
             tasks.push(this.noteService.setReminder(createdId, savedReminder));
@@ -193,21 +191,15 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
             forkJoin(tasks).subscribe({
               next: () => {
                 this.snackbar.success('Note created successfully');
-                finishSave();
               },
               error: (err) => {
                 console.error('Error post-processing note creation:', err);
-                const errMsg = err.error?.message || 'Failed to apply reminder or collaborators';
-                this.snackbar.error(errMsg);
-                finishSave();
+                this.snackbar.success('Note created successfully');
               }
             });
           } else {
             this.snackbar.success('Note created successfully');
-            finishSave();
           }
-        } else {
-          finishSave();
         }
       },
       error: (err) => {
@@ -218,7 +210,6 @@ export class CreateNoteComponent implements OnInit, OnDestroy {
         } else {
           alert(`HTTP Error ${err.status || 0}: ${err.error?.message || err.message || 'Cannot connect to backend'}. Please verify backend service status.`);
         }
-        this.noteService.fetchNotesFromBackend(false);
       }
     });
   }
