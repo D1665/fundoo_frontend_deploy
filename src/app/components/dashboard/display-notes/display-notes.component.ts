@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ViewChildren, QueryList } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { NgxMasonryComponent, NgxMasonryOptions } from 'ngx-masonry';
 import { NoteService } from '../../../services/notes.service';
@@ -13,12 +13,11 @@ import { SnackbarService } from '../../../services/snackbar.service';
   styleUrls: ['./display-notes.component.css']
 })
 export class DisplayNotesComponent implements OnInit, OnDestroy {
-  @ViewChild(NgxMasonryComponent) masonry!: NgxMasonryComponent;
+  @ViewChildren(NgxMasonryComponent) masonries!: QueryList<NgxMasonryComponent>;
 
   masonryOptions: NgxMasonryOptions = {
     gutter: 16,
-    itemSelector: '.masonry-item',
-    horizontalOrder: true
+    itemSelector: '.masonry-item'
   };
 
   notes: Note[] = [];
@@ -229,12 +228,20 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       this.otherNotes = sourceNotes;
     }
 
+    this.reloadMasonryLayout();
+  }
+
+  reloadMasonryLayout(): void {
     setTimeout(() => {
-      if (this.masonry) {
-        this.masonry.reloadItems();
-        this.masonry.layout();
+      if (this.masonries) {
+        this.masonries.forEach(m => {
+          try {
+            m.reloadItems();
+            m.layout();
+          } catch (e) {}
+        });
       }
-    });
+    }, 50);
   }
 
   togglePin(note: Note, event: MouseEvent): void {
