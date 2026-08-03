@@ -52,7 +52,7 @@
 
 /* Notes Grid - Masonry Layout (powered by ngx-masonry) */
 .notes-grid {
-    margin: 0 auto;
+    display: block;
     width: 100%;
 }
 
@@ -70,10 +70,12 @@
     justify-content: space-between;
     min-height: 110px;
     animation: cardFadeIn 0.22s cubic-bezier(0, 0, 0.2, 1) forwards;
+    box-sizing: border-box;
 }
 
 .note-card.masonry-item {
     width: 240px;
+    margin-bottom: 16px;
 }
 
 .note-card.active-menu-card {

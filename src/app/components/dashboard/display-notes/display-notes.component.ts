@@ -17,7 +17,7 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
 
   masonryOptions: NgxMasonryOptions = {
     gutter: 16,
-    fitWidth: true,
+    itemSelector: '.masonry-item',
     horizontalOrder: true
   };
 
@@ -228,6 +228,13 @@ export class DisplayNotesComponent implements OnInit, OnDestroy {
       this.pinnedNotes = [];
       this.otherNotes = sourceNotes;
     }
+
+    setTimeout(() => {
+      if (this.masonry) {
+        this.masonry.reloadItems();
+        this.masonry.layout();
+      }
+    });
   }
 
   togglePin(note: Note, event: MouseEvent): void {
