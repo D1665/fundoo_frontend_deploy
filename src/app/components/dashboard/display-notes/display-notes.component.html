@@ -43,7 +43,7 @@
 
                 <div class="card-header">
                     <div class="title-with-badge">
-                        <h4 class="card-title">{{ note.title }}</h4>
+                        <h4 class="card-title" [innerHTML]="note.title | highlight:searchQuery"></h4>
                         <span *ngIf="isSharedNote(note)" class="shared-badge" [title]="'Shared by ' + (note.ownerEmail || 'another user')">Shared</span>
                     </div>
                     <button mat-icon-button class="pin-btn pinned" (click)="togglePin(note, $event)" title="Unpin note">
@@ -51,8 +51,7 @@
                     </button>
                 </div>
 
-                <div class="card-content">
-                    {{ note.content || note.description }}
+                <div class="card-content" [innerHTML]="(note.content || note.description) | highlight:searchQuery">
                 </div>
 
                 <!-- Label, Reminder & Collaborator Chips (All in one row) -->
@@ -188,7 +187,7 @@
 
                 <div class="card-header">
                     <div class="title-with-badge">
-                        <h4 class="card-title">{{ note.title }}</h4>
+                        <h4 class="card-title" [innerHTML]="note.title | highlight:searchQuery"></h4>
                         <span *ngIf="isSharedNote(note)" class="shared-badge" [title]="'Shared by ' + (note.ownerEmail || 'another user')">Shared</span>
                     </div>
                     <button *ngIf="currentView === 'notes'" mat-icon-button class="pin-btn" (click)="togglePin(note, $event)" title="Pin note">
@@ -196,8 +195,7 @@
                     </button>
                 </div>
 
-                <div class="card-content">
-                    {{ note.content || note.description }}
+                <div class="card-content" [innerHTML]="(note.content || note.description) | highlight:searchQuery">
                 </div>
 
                 <!-- Label, Reminder & Collaborator Chips (All in one row) -->

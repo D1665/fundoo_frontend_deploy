@@ -50,12 +50,11 @@
     text-transform: uppercase;
 }
 
-/* Notes Grid */
+/* Notes Grid - Masonry Layout */
 .notes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
-    align-items: start;
+    column-count: 4;
+    column-gap: 16px;
+    width: 100%;
 }
 
 /* Note Card */
@@ -67,10 +66,12 @@
     cursor: pointer;
     transition: box-shadow 0.2s ease, border-color 0.2s ease;
     word-break: break-word;
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 110px;
+    width: 100%;
+    margin-bottom: 16px;
+    break-inside: avoid;
     animation: cardFadeIn 0.22s cubic-bezier(0, 0, 0.2, 1) forwards;
 }
 
@@ -676,6 +677,7 @@
 
 /* List View layout */
 .notes-grid.list-view {
+    column-count: unset;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -684,17 +686,31 @@
 }
 
 .notes-grid.list-view .note-card {
+    display: flex;
     width: 100%;
     max-width: 600px;
-    height: auto; /* Expand naturally in list view */
+    height: auto;
     min-height: auto;
+    margin-bottom: 0;
+    break-inside: auto;
 }
 
 /* Modals & Layout Responsiveness */
+@media (max-width: 1200px) {
+    .notes-grid {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 900px) {
+    .notes-grid {
+        column-count: 2;
+    }
+}
+
 @media (max-width: 480px) {
     .notes-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
+        column-count: 1;
     }
     .modal-card {
         width: 95% !important;
@@ -959,4 +975,15 @@
     height: 14px !important;
     line-height: 14px !important;
     color: #202124;
+}
+
+/* Search Highlight */
+mark.search-highlight {
+    background-color: #fff9c4;
+    color: inherit;
+    padding: 1px 2px;
+    border-radius: 2px;
+    border: none;
+    font-style: inherit;
+    font-weight: inherit;
 }

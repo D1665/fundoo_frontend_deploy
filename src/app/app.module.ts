@@ -15,6 +15,7 @@ import { NavbarComponent } from './components/dashboard/navbar/navbar.component'
 import { SidebarComponent } from './components/dashboard/sidebar/sidebar.component';
 import { CreateNoteComponent } from './components/dashboard/create-note/create-note.component';
 import { DisplayNotesComponent } from './components/dashboard/display-notes/display-notes.component';
+import { HighlightPipe } from './pipes/highlight.pipe';
 
 // Angular Material Modules
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -40,7 +41,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
       NavbarComponent,
       SidebarComponent,
       CreateNoteComponent,
-      DisplayNotesComponent
+      DisplayNotesComponent,
+      HighlightPipe
      
     ],
     imports: [
